@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Dom vs Max — MK Wii</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏁</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#07090f;--surface:#0d1220;--card:#111827;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --gold:#ffd700;--p1:#ff5555;--p1bg:rgba(255,85,85,.1);--p1bd:rgba(255,85,85,.25);
+  --p2:#55aaff;--p2bg:rgba(85,170,255,.1);--p2bd:rgba(85,170,255,.25);
+  --green:#4dffa0;--muted:rgba(232,237,248,.45);--text:#e8edf8;
+  --sb:170px;--nav-h:62px;
+}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── SIDEBAR (desktop) ── */
+#sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:var(--sb);
+  background:#0a0d18;border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:200;
+}
+.sb-logo{padding:1.4rem 1rem 1rem;text-align:center;border-bottom:1px solid var(--border);}
+.sb-logo-text{font-family:'Press Start 2P',cursive;font-size:9px;color:var(--gold);line-height:2;}
+.sb-logo-sub{font-size:11px;color:var(--muted);margin-top:3px;font-weight:700;}
+.sb-nav{padding:.5rem;display:flex;flex-direction:column;gap:3px;flex:1;}
+.nav-btn{
+  display:flex;align-items:center;gap:9px;padding:.75rem .875rem;min-height:44px;
+  border-radius:10px;border:none;background:transparent;color:var(--muted);
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;
+  text-align:left;width:100%;touch-action:manipulation;transition:background .15s,color .15s;
+}
+.nav-btn:hover{background:rgba(255,255,255,.05);color:var(--text);}
+.nav-btn.active{background:rgba(255,215,0,.12);color:var(--gold);}
+.nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.sb-footer{padding:.875rem;border-top:1px solid var(--border);}
+.sb-stat{font-size:11px;color:var(--muted);margin-bottom:5px;line-height:1.6;}
+.sb-stat strong{color:var(--text);}
+
+/* ── MAIN ── */
+#main{margin-left:var(--sb);min-height:100vh;}
+.page{display:none;padding:1.5rem 1.5rem 4rem;}
+.page.active{display:block;}
+.ph{margin-bottom:1.25rem;}
+.ph-title{font-family:'Press Start 2P',cursive;font-size:10px;color:var(--gold);line-height:2;}
+.ph-sub{font-size:13px;color:var(--muted);margin-top:3px;}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.25rem;margin-bottom:1rem;}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;
+  padding:0 18px;height:44px;border-radius:10px;border:none;cursor:pointer;
+  touch-action:manipulation;transition:transform .1s,opacity .1s;white-space:nowrap;
+}
+.btn:active{transform:scale(.96);}
+.btn-gold{background:var(--gold);color:#1a0e00;}.btn-gold:hover{opacity:.88;}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text);}.btn-outline:hover{background:rgba(255,255,255,.05);}
+.btn-green{background:var(--green);color:#001a08;}.btn-green:hover{opacity:.88;}
+.btn-submit{background:rgba(77,255,160,.12);border:1px solid rgba(77,255,160,.35);color:var(--green);font-weight:900;}
+.btn-submit:hover{background:rgba(77,255,160,.22);}
+.btn-submit:disabled{opacity:.3;cursor:not-allowed;transform:none;}
+.btn-del{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:transparent;border:1px solid transparent;color:var(--muted);
+  height:36px;padding:0 10px;font-size:12px;font-family:'Nunito',sans-serif;font-weight:700;
+  border-radius:8px;cursor:pointer;touch-action:manipulation;white-space:nowrap;flex-shrink:0;
+}
+.btn-del:hover{color:var(--p1);background:var(--p1bg);border-color:var(--p1bd);}
+.btn-toggle{
+  background:transparent;border:none;color:var(--muted);
+  font-size:12px;font-family:'Nunito',sans-serif;font-weight:700;
+  cursor:pointer;touch-action:manipulation;padding:8px 0;
+  display:flex;align-items:center;gap:5px;width:100%;justify-content:center;margin-top:.75rem;
+}
+.btn-toggle:hover{color:var(--text);}
+
+/* ── PAIRS ── */
+.pair-display{display:grid;grid-template-columns:1fr 38px 1fr;gap:8px;align-items:center;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.pair-card{border-radius:12px;padding:.875rem;text-align:center;}
+.pair-card.dom{background:var(--p1bg);border:1px solid var(--p1bd);}
+.pair-card.max{background:var(--p2bg);border:1px solid var(--p2bd);}
+.pair-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+.pair-card.dom .pair-lbl{color:var(--p1);}
+.pair-card.max .pair-lbl{color:var(--p2);}
+.pair-char{font-size:14px;font-weight:900;margin-bottom:3px;}
+.pair-veh{font-size:12px;color:var(--muted);}
+.pair-wc{font-size:11px;color:var(--muted);margin-top:3px;text-transform:capitalize;}
+.vs-lbl{font-family:'Press Start 2P',cursive;font-size:8px;color:var(--muted);text-align:center;}
+
+/* ── ADD ROW ── */
+.add-row{display:flex;gap:8px;flex-wrap:wrap;padding-top:1rem;border-top:1px solid var(--border);margin-top:1rem;}
+
+/* ── ROUND CARD ── */
+.round-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.25rem;margin-bottom:.875rem;}
+.round-card.is-draft{border-color:rgba(77,255,160,.2);}
+.rh{display:flex;align-items:center;gap:7px;margin-bottom:1rem;flex-wrap:wrap;}
+.rnum{font-family:'Press Start 2P',cursive;font-size:9px;color:var(--gold);}
+.sub-badge{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:rgba(77,255,160,.1);border:1px solid rgba(77,255,160,.28);color:var(--green);}
+.wc-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:capitalize;}
+.wc-small{background:rgba(160,210,120,.08);border:1px solid rgba(160,210,120,.25);color:#9ed070;}
+.wc-medium{background:rgba(120,160,255,.08);border:1px solid rgba(120,160,255,.25);color:#88aaff;}
+.wc-large{background:rgba(255,160,80,.08);border:1px solid rgba(255,160,80,.25);color:#ffaa60;}
+.round-pairs{display:grid;grid-template-columns:1fr 30px 1fr;gap:8px;align-items:center;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);}
+.rp-card{border-radius:10px;padding:.7rem;text-align:center;}
+.rp-card.dom{background:var(--p1bg);border:1px solid var(--p1bd);}
+.rp-card.max{background:var(--p2bg);border:1px solid var(--p2bd);}
+.rp-who{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px;}
+.rp-card.dom .rp-who{color:var(--p1);}
+.rp-card.max .rp-who{color:var(--p2);}
+.rp-char{font-size:13px;font-weight:900;margin-bottom:2px;}
+.rp-veh{font-size:11px;color:var(--muted);}
+.rp-wc{font-size:10px;color:var(--muted);margin-top:2px;text-transform:capitalize;}
+
+/* ── GP SECTION ── */
+.gp-sec{margin-bottom:.5rem;}
+.gp-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.gp-title{font-family:'Press Start 2P',cursive;font-size:8px;color:var(--text);}
+.swap-badge{font-size:11px;font-weight:700;color:#88aaff;background:rgba(120,160,255,.1);border:1px solid rgba(120,160,255,.2);padding:2px 9px;border-radius:20px;}
+.char-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.ctag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;}
+.ctag.dom{background:var(--p1bg);color:var(--p1);border:1px solid var(--p1bd);}
+.ctag.max{background:var(--p2bg);color:var(--p2);border:1px solid var(--p2bd);}
+
+/* ── RACE ROWS (mobile-first, no table) ── */
+.gp-races{display:flex;flex-direction:column;}
+.race-row{border-bottom:1px solid rgba(255,255,255,.04);padding:8px 0;}
+.race-row:last-child{border-bottom:none;}
+.race-top{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
+.rn{font-size:11px;color:var(--muted);min-width:22px;font-weight:700;flex-shrink:0;}
+.rtrack{flex:1;}
+.race-bottom{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.rscore{display:flex;align-items:center;gap:5px;min-width:0;}
+.rscore-who{font-size:12px;font-weight:700;min-width:32px;flex-shrink:0;}
+.rscore-who.dom{color:var(--p1);}
+.rscore-who.max{color:var(--p2);}
+.rscore .psel{flex:1;min-width:0;}
+.rscore-pts{font-size:12px;font-weight:700;min-width:20px;text-align:right;flex-shrink:0;}
+.rscore-pts.dom{color:var(--p1);}
+.rscore-pts.max{color:var(--p2);}
+.rscore-pts.dim{color:var(--muted);font-weight:400;}
+
+.gp-footer{display:flex;align-items:center;gap:10px;padding:9px 0 3px;border-top:1px solid var(--border2);margin-top:5px;}
+.gpf-lbl{font-size:12px;color:var(--muted);font-weight:700;flex:1;}
+.gptv{font-size:14px;font-weight:900;}
+.gptv.dom{color:var(--p1);}
+.gptv.max{color:var(--p2);}
+
+/* ── SELECTS: font-size 16px prevents iOS auto-zoom ── */
+select.tsel,select.psel{
+  background:var(--surface);border:1px solid var(--border2);border-radius:8px;
+  color:var(--text);font-family:'Nunito',sans-serif;font-size:16px;
+  padding:9px 28px 9px 8px;width:100%;cursor:pointer;height:44px;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23667799' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center;
+}
+select.tsel:focus,select.psel:focus{outline:none;border-color:rgba(255,255,255,.35);}
+select option{background:#111827;font-size:14px;}
+
+/* ── ROUND TOTAL ── */
+.rt{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.rt-lbl{font-family:'Press Start 2P',cursive;font-size:8px;color:var(--muted);line-height:1.8;}
+.rt-score{font-size:18px;font-weight:900;}
+.rt-score.dom{color:var(--p1);}
+.rt-score.max{color:var(--p2);}
+.win-badge{font-family:'Press Start 2P',cursive;font-size:7px;padding:7px 11px;border-radius:9px;margin-left:auto;white-space:nowrap;}
+.win-badge.dom{background:var(--p1bg);color:var(--p1);border:1px solid var(--p1bd);}
+.win-badge.max{background:var(--p2bg);color:var(--p2);border:1px solid var(--p2bd);}
+.win-badge.draw{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border2);}
+.submit-row{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);}
+.submit-hint{font-size:12px;color:var(--muted);margin-top:8px;}
+.divider{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--muted);font-size:14px;}
+
+/* ── STATS PAGE ── */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:.875rem;margin-bottom:.875rem;}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem;}
+.sc.full{grid-column:1/-1;}
+.sc-title{font-family:'Press Start 2P',cursive;font-size:8px;color:var(--gold);margin-bottom:.875rem;line-height:1.8;}
+.sc-sub{font-size:12px;color:var(--muted);margin-bottom:.75rem;}
+
+.record-row{display:flex;align-items:center;gap:10px;margin-bottom:.75rem;}
+.rec-name{font-size:13px;font-weight:700;min-width:36px;}
+.rec-name.dom{color:var(--p1);}
+.rec-name.max{color:var(--p2);}
+.rec-bar-wrap{flex:1;background:rgba(255,255,255,.05);border-radius:20px;height:10px;overflow:hidden;}
+.rec-bar{height:100%;border-radius:20px;}
+.rec-bar.dom{background:var(--p1);}
+.rec-bar.max{background:var(--p2);}
+.rec-val{font-size:14px;font-weight:900;min-width:20px;text-align:right;}
+.rec-val.dom{color:var(--p1);}
+.rec-val.max{color:var(--p2);}
+
+.best-item{margin-bottom:.875rem;padding-bottom:.875rem;border-bottom:1px solid var(--border);}
+.best-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.best-who{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px;}
+.best-who.dom{color:var(--p1);}
+.best-who.max{color:var(--p2);}
+.best-main{font-size:20px;font-weight:900;margin-bottom:2px;}
+.best-detail{font-size:12px;color:var(--muted);line-height:1.5;}
+
+.pt{width:100%;border-collapse:collapse;}
+.pt th{font-size:11px;color:var(--muted);font-weight:700;text-align:left;padding:5px 6px;border-bottom:1px solid var(--border2);}
+.pt td{font-size:13px;padding:6px 6px;border-bottom:1px solid var(--border);}
+.pt tr:last-child td{border-bottom:none;}
+.dom-val{color:var(--p1);font-weight:700;}
+.max-val{color:var(--p2);font-weight:700;}
+.pw{font-size:10px;padding:1px 7px;border-radius:10px;}
+.pw.dom{background:var(--p1bg);color:var(--p1);}
+.pw.max{background:var(--p2bg);color:var(--p2);}
+.no-data{padding:.5rem 0;color:var(--muted);font-size:12px;}
+
+.trc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+.trc-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.875rem;}
+.trc-stat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.trc-stat.speed{color:#ff9955;}.trc-stat.offroad{color:#9ed070;}.trc-stat.handling{color:#88aaff;}.trc-stat.drift{color:#dd88ff;}.trc-stat.miniTurbo{color:#ffaa60;}
+.trc-desc{font-size:11px;color:var(--muted);margin-bottom:.6rem;line-height:1.5;}
+.trc-tl{font-size:10px;color:var(--muted);font-weight:700;margin-bottom:3px;}
+.trc-tracks{font-size:11px;color:var(--text);margin-bottom:.6rem;line-height:1.6;}
+.trc-vehs{display:flex;flex-wrap:wrap;gap:3px;}
+.trc-veh{font-size:10px;padding:2px 7px;border-radius:20px;background:rgba(255,255,255,.06);color:var(--muted);}
+
+/* Manage submissions */
+.mgmt-row{display:flex;align-items:center;gap:10px;padding:.75rem 0;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.mgmt-row:last-child{border-bottom:none;}
+.mgmt-num{font-family:'Press Start 2P',cursive;font-size:8px;color:var(--gold);min-width:58px;flex-shrink:0;}
+.mgmt-info{flex:1;min-width:0;}
+.mgmt-chars{font-size:13px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mgmt-result{font-size:12px;color:var(--muted);}
+.mgmt-result.dom{color:var(--p1);}
+.mgmt-result.max{color:var(--p2);}
+
+/* ── MOBILE ── */
+@media(max-width:640px){
+  #sidebar{
+    position:fixed;top:auto;left:0;right:0;bottom:0;width:100%;height:var(--nav-h);
+    flex-direction:row;border-right:none;border-top:1px solid var(--border);
+  }
+  .sb-logo,.sb-footer{display:none;}
+  .sb-nav{flex-direction:row;padding:.4rem;gap:0;flex:1;}
+  .nav-btn{flex-direction:column;gap:2px;align-items:center;justify-content:center;padding:.4rem;font-size:10px;flex:1;height:auto;min-height:unset;border-radius:8px;}
+  .nav-icon{font-size:22px;width:auto;}
+  #main{margin-left:0;padding-bottom:calc(var(--nav-h) + .5rem);}
+  .page{padding:1rem 1rem 2rem;}
+  /* Stats grid single col on mobile */
+  .stats-grid{grid-template-columns:1fr;}
+  .sc.full{grid-column:1;}
+  .trc-grid{grid-template-columns:1fr;}
+  /* Pair cards */
+  .pair-display{grid-template-columns:1fr 30px 1fr;gap:6px;}
+  .pair-char{font-size:12px;}
+  /* Add row full width */
+  .add-row{flex-direction:column;}
+  .add-row .btn{width:100%;}
+  /* Submit full width */
+  .submit-row .btn{width:100%;}
+  /* Round total */
+  .rt-score{font-size:16px;}
+}
+@media(max-width:360px){
+  .pair-display{grid-template-columns:1fr 26px 1fr;gap:5px;}
+  .pair-char{font-size:11px;}
+  .pair-veh{font-size:10px;}
+}
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-text">🏁 MK WII</div>
+    <div class="sb-logo-sub">Dom vs Max</div>
+  </div>
+  <nav class="sb-nav">
+    <button class="nav-btn active" id="nav-competition" onclick="showPage('competition')">
+      <span class="nav-icon">🎮</span><span>Competition</span>
+    </button>
+    <button class="nav-btn" id="nav-stats" onclick="showPage('stats')">
+      <span class="nav-icon">📊</span><span>Stats</span>
+    </button>
+  </nav>
+  <div class="sb-footer" id="sb-footer"></div>
+</div>
+
+<div id="main">
+  <div id="page-competition" class="page active">
+    <div class="ph">
+      <div class="ph-title">CHARACTER GENERATOR</div>
+      <div class="ph-sub">Randomise, race two GPs, submit the round</div>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:wrap;">
+        <span style="font-family:'Press Start 2P',cursive;font-size:8px;color:var(--gold);line-height:1.8;">PICK YOUR<br>CHARACTERS</span>
+        <button class="btn btn-gold" onclick="generatePairs()" style="margin-left:auto;">🎲 Randomise</button>
+      </div>
+      <div id="gen-out"></div>
+      <div id="add-row" class="add-row" style="display:none;">
+        <button class="btn btn-green" onclick="startRound()">+ Start round</button>
+        <button class="btn btn-outline" onclick="generatePairs()">↻ Re-roll</button>
+      </div>
+    </div>
+    <div id="rounds-container"><div class="empty">Randomise some pairs above to start your first round 🏎️</div></div>
+  </div>
+
+  <div id="page-stats" class="page">
+    <div class="ph">
+      <div class="ph-title">STATS & INSIGHTS</div>
+      <div class="ph-sub">Based on submitted rounds only</div>
+    </div>
+    <div id="stats-content"><div class="empty">Submit a round to see stats here 📊</div></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ═══ DATA ═══ */
+const MK_PTS=[15,12,10,8,7,6,5,4,3,2,1,0];
+const ALL_CHARS=[
+  {n:"Baby Mario",wc:"small"},{n:"Baby Luigi",wc:"small"},{n:"Baby Peach",wc:"small"},
+  {n:"Baby Daisy",wc:"small"},{n:"Toad",wc:"small"},{n:"Toadette",wc:"small"},
+  {n:"Koopa Troopa",wc:"small"},{n:"Dry Bones",wc:"small"},
+  {n:"Mario",wc:"medium"},{n:"Luigi",wc:"medium"},{n:"Peach",wc:"medium"},
+  {n:"Daisy",wc:"medium"},{n:"Yoshi",wc:"medium"},{n:"Birdo",wc:"medium"},
+  {n:"Diddy Kong",wc:"medium"},{n:"Bowser Jr.",wc:"medium"},
+  {n:"Wario",wc:"large"},{n:"Waluigi",wc:"large"},{n:"Donkey Kong",wc:"large"},
+  {n:"Bowser",wc:"large"},{n:"King Boo",wc:"large"},{n:"Rosalina",wc:"large"},
+  {n:"Funky Kong",wc:"large"},{n:"Dry Bowser",wc:"large"}
+];
+const VEHS={
+  small:["Bullet Blaster","Booster Seat","Tiny Titan","Blue Falcon","Mini Beast","Cheep Charger","Bullet Bike","Bit Bike","Bubble Bike","Quacker","Magikruiser","Jet Bubble"],
+  medium:["Classic Dragster","Wild Wing","Super Blooper","Daytripper","Sprinter","B Dasher Mk 2","Mach Bike","Sugarscoot","Zip Zip","Sneakster","Dolphin Dasher","Nitrocycle"],
+  large:["Offroader","Flame Flyer","Piranha Prowler","Jetsetter","Honeycoupe","Bowser Bike","Wario Bike","Shooting Star","Spear","Phantom"]
+};
+const BIKE_SET=new Set(["Bullet Bike","Bit Bike","Bubble Bike","Quacker","Magikruiser","Jet Bubble","Mach Bike","Sugarscoot","Zip Zip","Sneakster","Dolphin Dasher","Nitrocycle","Bowser Bike","Wario Bike","Shooting Star","Spear","Phantom"]);
+const VEH_STATS={
+  "Bullet Blaster":{speed:8,offroad:2,handling:4,drift:3,miniTurbo:3},"Booster Seat":{speed:3,offroad:5,handling:8,drift:5,miniTurbo:7},
+  "Tiny Titan":{speed:4,offroad:7,handling:6,drift:5,miniTurbo:6},"Blue Falcon":{speed:7,offroad:2,handling:6,drift:5,miniTurbo:4},
+  "Mini Beast":{speed:5,offroad:5,handling:5,drift:5,miniTurbo:5},"Cheep Charger":{speed:3,offroad:9,handling:6,drift:5,miniTurbo:8},
+  "Bullet Bike":{speed:8,offroad:2,handling:4,drift:5,miniTurbo:4},"Bit Bike":{speed:2,offroad:5,handling:9,drift:8,miniTurbo:9},
+  "Bubble Bike":{speed:2,offroad:7,handling:9,drift:8,miniTurbo:9},"Quacker":{speed:3,offroad:6,handling:9,drift:9,miniTurbo:10},
+  "Magikruiser":{speed:4,offroad:7,handling:7,drift:6,miniTurbo:7},"Jet Bubble":{speed:3,offroad:6,handling:8,drift:7,miniTurbo:8},
+  "Classic Dragster":{speed:7,offroad:3,handling:4,drift:4,miniTurbo:3},"Wild Wing":{speed:5,offroad:4,handling:7,drift:6,miniTurbo:7},
+  "Super Blooper":{speed:4,offroad:7,handling:6,drift:5,miniTurbo:7},"Daytripper":{speed:5,offroad:6,handling:7,drift:6,miniTurbo:7},
+  "Sprinter":{speed:8,offroad:2,handling:4,drift:4,miniTurbo:2},"B Dasher Mk 2":{speed:7,offroad:2,handling:4,drift:4,miniTurbo:3},
+  "Mach Bike":{speed:7,offroad:3,handling:5,drift:6,miniTurbo:6},"Sugarscoot":{speed:3,offroad:6,handling:8,drift:7,miniTurbo:9},
+  "Zip Zip":{speed:6,offroad:4,handling:6,drift:7,miniTurbo:7},"Sneakster":{speed:8,offroad:2,handling:4,drift:5,miniTurbo:4},
+  "Dolphin Dasher":{speed:4,offroad:6,handling:8,drift:8,miniTurbo:9},"Nitrocycle":{speed:7,offroad:2,handling:5,drift:7,miniTurbo:6},
+  "Offroader":{speed:4,offroad:10,handling:5,drift:5,miniTurbo:6},"Flame Flyer":{speed:7,offroad:4,handling:4,drift:4,miniTurbo:4},
+  "Piranha Prowler":{speed:8,offroad:2,handling:3,drift:3,miniTurbo:2},"Jetsetter":{speed:10,offroad:1,handling:3,drift:3,miniTurbo:1},
+  "Honeycoupe":{speed:5,offroad:5,handling:6,drift:6,miniTurbo:6},"Bowser Bike":{speed:7,offroad:6,handling:4,drift:5,miniTurbo:4},
+  "Wario Bike":{speed:7,offroad:5,handling:4,drift:5,miniTurbo:4},"Shooting Star":{speed:5,offroad:5,handling:6,drift:7,miniTurbo:7},
+  "Spear":{speed:8,offroad:2,handling:4,drift:6,miniTurbo:3},"Phantom":{speed:6,offroad:4,handling:5,drift:5,miniTurbo:5}
+};
+const TRACKS=[
+  {cup:"Mushroom Cup",tracks:["Luigi Circuit","Moo Moo Meadows","Mushroom Gorge","Toad's Factory"]},
+  {cup:"Flower Cup",tracks:["Mario Circuit","Coconut Mall","DK Summit","Wario's Gold Mine"]},
+  {cup:"Star Cup",tracks:["Daisy Circuit","Koopa Cape","Maple Treeway","Grumble Volcano"]},
+  {cup:"Special Cup",tracks:["Dry Dry Ruins","Moonview Highway","Bowser's Castle","Rainbow Road"]},
+  {cup:"Shell Cup",tracks:["GCN Peach Beach","DS Yoshi Falls","SNES Ghost Valley 2","N64 Mario Raceway"]},
+  {cup:"Banana Cup",tracks:["N64 Sherbet Land","GBA Shy Guy Beach","DS Delfino Square","GCN Waluigi Stadium"]},
+  {cup:"Leaf Cup",tracks:["DS Desert Hills","GBA Bowser Castle 3","N64 DK's Jungle Parkway","GCN Mario Circuit"]},
+  {cup:"Lightning Cup",tracks:["SNES Mario Circuit 3","DS Peach Gardens","GCN DK Mountain","N64 Bowser's Castle"]}
+];
+const TRACK_KEY={
+  "Luigi Circuit":{key:"speed"},"Moo Moo Meadows":{key:"offroad"},"Mushroom Gorge":{key:"offroad"},
+  "Toad's Factory":{key:"handling"},"Mario Circuit":{key:"handling"},"Coconut Mall":{key:"handling"},
+  "DK Summit":{key:"drift"},"Wario's Gold Mine":{key:"speed"},"Daisy Circuit":{key:"speed"},
+  "Koopa Cape":{key:"handling"},"Maple Treeway":{key:"miniTurbo"},"Grumble Volcano":{key:"handling"},
+  "Dry Dry Ruins":{key:"offroad"},"Moonview Highway":{key:"speed"},"Bowser's Castle":{key:"handling"},
+  "Rainbow Road":{key:"handling"},"GCN Peach Beach":{key:"offroad"},"DS Yoshi Falls":{key:"miniTurbo"},
+  "SNES Ghost Valley 2":{key:"handling"},"N64 Mario Raceway":{key:"speed"},"N64 Sherbet Land":{key:"drift"},
+  "GBA Shy Guy Beach":{key:"offroad"},"DS Delfino Square":{key:"handling"},"GCN Waluigi Stadium":{key:"handling"},
+  "DS Desert Hills":{key:"offroad"},"GBA Bowser Castle 3":{key:"handling"},"N64 DK's Jungle Parkway":{key:"offroad"},
+  "GCN Mario Circuit":{key:"handling"},"SNES Mario Circuit 3":{key:"speed"},"DS Peach Gardens":{key:"handling"},
+  "GCN DK Mountain":{key:"offroad"},"N64 Bowser's Castle":{key:"handling"}
+};
+const STAT_INFO={
+  speed:{label:"Speed",color:"#ff9955",desc:"Fast straights — top speed is king."},
+  offroad:{label:"Offroad",color:"#9ed070",desc:"Sand and grass punish low offroad badly."},
+  handling:{label:"Handling",color:"#88aaff",desc:"Tight technical layouts reward precision."},
+  drift:{label:"Drift",color:"#dd88ff",desc:"Sweeping bends that reward committed drifting."},
+  miniTurbo:{label:"Mini-Turbo",color:"#ffaa60",desc:"Frequent short drifts — boosts add up."}
+};
+
+/* ═══ STATE ═══ */
+let curPairs=null,draft=null,submitted=[];
+function saveAll(){
+  try{
+    if(draft)localStorage.setItem("mkwii-draft",JSON.stringify(draft));
+    else localStorage.removeItem("mkwii-draft");
+    localStorage.setItem("mkwii-db",JSON.stringify(submitted));
+  }catch(e){}
+}
+function loadAll(){
+  try{
+    const d=localStorage.getItem("mkwii-draft");if(d)draft=JSON.parse(d);
+    const s=localStorage.getItem("mkwii-db");if(s)submitted=JSON.parse(s);
+  }catch(e){}
+}
+
+/* ═══ HELPERS ═══ */
+function rnd(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function pts(p){return(p>0&&p<=12)?MK_PTS[p-1]:0;}
+function rPts(race,who){return pts(race[who+"Pos"]);}
+function gpTot(races,who){return races.reduce((s,r)=>s+rPts(r,who),0);}
+function ord(n){if(n===11||n===12)return n+"th";const s=["th","st","nd","rd"];return n+(s[n%10]||"th");}
+function avg(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:null;}
+function fa(v){return v===null?"—":v.toFixed(1);}
+function wcBadge(wc){return`<span class="wc-badge wc-${wc}">${wc}</span>`;}
+function trackSelect(val,rid){
+  let h=`<option value="">— Pick track —</option>`;
+  TRACKS.forEach(g=>{h+=`<optgroup label="${g.cup}">`+g.tracks.map(t=>`<option value="${t}"${val===t?" selected":""}>${t}</option>`).join("")+`</optgroup>`;});
+  return`<select class="tsel" onchange="updateTrack('${rid}',this.value)">${h}</select>`;
+}
+function posSelect(val,rid,who){
+  let h=`<option value="0">—</option>`;
+  for(let p=1;p<=12;p++)h+=`<option value="${p}"${val===p?" selected":""}>${ord(p)} (${MK_PTS[p-1]})</option>`;
+  return`<select class="psel" onchange="updatePos('${rid}','${who}',this.value)">${h}</select>`;
+}
+
+/* ═══ PAGE SWITCH ═══ */
+function showPage(p){
+  document.querySelectorAll(".page").forEach(el=>el.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(el=>el.classList.remove("active"));
+  document.getElementById("page-"+p).classList.add("active");
+  document.getElementById("nav-"+p).classList.add("active");
+  if(p==="stats")renderStats();
+}
+
+/* ═══ GENERATOR ═══ */
+function generatePairs(){
+  const chars=[...ALL_CHARS];
+  const c1=chars.splice(Math.floor(Math.random()*chars.length),1)[0],c2=rnd(chars);
+  const v1=rnd(VEHS[c1.wc]),v2=rnd(VEHS[c2.wc]);
+  curPairs={dom:{char:c1.n,wc:c1.wc,veh:v1},max:{char:c2.n,wc:c2.wc,veh:v2}};
+  document.getElementById("gen-out").innerHTML=`
+    <div class="pair-display">
+      <div class="pair-card dom"><div class="pair-lbl">Dom</div><div class="pair-char">${c1.n}</div><div class="pair-veh">${v1}</div><div class="pair-wc">${c1.wc}</div></div>
+      <div class="vs-lbl">VS</div>
+      <div class="pair-card max"><div class="pair-lbl">Max</div><div class="pair-char">${c2.n}</div><div class="pair-veh">${v2}</div><div class="pair-wc">${c2.wc}</div></div>
+    </div>`;
+  document.getElementById("add-row").style.display="flex";
+}
+
+function startRound(){
+  if(!curPairs)return;
+  if(draft&&!confirm("Discard the current unsubmitted round?"))return;
+  draft={id:Date.now(),dom:{...curPairs.dom},max:{...curPairs.max},
+    gp1:Array.from({length:8},()=>({track:"",domPos:0,maxPos:0})),
+    gp2:Array.from({length:8},()=>({track:"",domPos:0,maxPos:0}))};
+  saveAll();curPairs=null;
+  document.getElementById("gen-out").innerHTML="";
+  document.getElementById("add-row").style.display="none";
+  renderRounds();
+}
+
+/* ═══ SCORE UPDATES ═══ */
+function updateTrack(rid,val){
+  if(!draft)return;
+  const[,gp,i]=rid.split("-");draft[gp][+i].track=val;saveAll();checkSubmit();
+}
+function updatePos(rid,who,val){
+  if(!draft)return;
+  const[,gp,i]=rid.split("-");draft[gp][+i][who+"Pos"]=parseInt(val)||0;
+  saveAll();refreshDraft();checkSubmit();
+}
+function refreshDraft(){
+  if(!draft)return;
+  const id=draft.id;
+  ["gp1","gp2"].forEach(gp=>{
+    ["dom","max"].forEach(who=>{
+      let t=0;
+      draft[gp].forEach((race,i)=>{
+        const p=rPts(race,who);t+=p;
+        const e=document.getElementById(`pc-${id}-${gp}-${who}-${i}`);
+        if(e){e.textContent=race[who+"Pos"]>0?p:"—";e.className="rscore-pts "+(race[who+"Pos"]>0?who:"dim");}
+      });
+      const te=document.getElementById(`gptv-${id}-${gp}-${who}`);if(te)te.textContent=t;
+    });
+  });
+  const dt=gpTot(draft.gp1,"dom")+gpTot(draft.gp2,"dom");
+  const mt=gpTot(draft.gp1,"max")+gpTot(draft.gp2,"max");
+  const e1=document.getElementById(`rtot-${draft.id}-dom`),e2=document.getElementById(`rtot-${draft.id}-max`),ew=document.getElementById(`win-${draft.id}`);
+  if(e1)e1.textContent=dt;if(e2)e2.textContent=mt;
+  if(ew){
+    if(dt===0&&mt===0)ew.innerHTML="";
+    else if(dt>mt)ew.innerHTML=`<div class="win-badge dom">🏆 DOM LEADS</div>`;
+    else if(mt>dt)ew.innerHTML=`<div class="win-badge max">🏆 MAX LEADS</div>`;
+    else ew.innerHTML=`<div class="win-badge draw">LEVEL</div>`;
+  }
+}
+function checkSubmit(){
+  const btn=document.getElementById("submit-btn"),hint=document.getElementById("submit-hint");
+  if(!btn||!draft)return;
+  const ok=[...draft.gp1,...draft.gp2].every(r=>r.track&&r.domPos>0&&r.maxPos>0);
+  btn.disabled=!ok;
+  if(hint)hint.textContent=ok?"All races filled — ready to submit!":"Fill every track and both positions to unlock submit.";
+}
+function submitRound(){
+  if(!draft||![...draft.gp1,...draft.gp2].every(r=>r.track&&r.domPos>0&&r.maxPos>0))return;
+  if(!confirm("Submit this round to the database? It will be locked."))return;
+  submitted.push({...draft,num:submitted.length+1,submittedAt:new Date().toISOString()});
+  draft=null;saveAll();renderRounds();updateSidebar();
+}
+
+/* ═══ ROUND RENDERING ═══ */
+function makeGP(round,gp,isDraft){
+  const id=round.id,is2=gp==="gp2";
+  const domC=is2?round.max:round.dom,maxC=is2?round.dom:round.max;
+  const px=isDraft?"d":"s";
+  let rows="";
+  round[gp].forEach((race,i)=>{
+    const rid=`${px}${id}-${gp}-${i}`;
+    const dp=race.domPos,mp=race.maxPos;
+    const trkCell=isDraft?trackSelect(race.track,rid):`<span style="font-size:13px;font-weight:700;">${race.track||"—"}</span>`;
+    const dSel=isDraft?posSelect(dp,rid,"dom"):`<span style="font-size:12px;color:var(--muted);">${dp>0?ord(dp):"—"}</span>`;
+    const mSel=isDraft?posSelect(mp,rid,"max"):`<span style="font-size:12px;color:var(--muted);">${mp>0?ord(mp):"—"}</span>`;
+    rows+=`<div class="race-row">
+      <div class="race-top"><span class="rn">R${i+1}</span><div class="rtrack">${trkCell}</div></div>
+      <div class="race-bottom">
+        <div class="rscore"><span class="rscore-who dom">Dom</span>${dSel}<span class="rscore-pts ${dp>0?"dom":"dim"}" id="pc-${px}${id}-${gp}-dom-${i}">${dp>0?pts(dp):"—"}</span></div>
+        <div class="rscore"><span class="rscore-who max">Max</span>${mSel}<span class="rscore-pts ${mp>0?"max":"dim"}" id="pc-${px}${id}-${gp}-max-${i}">${mp>0?pts(mp):"—"}</span></div>
+      </div>
+    </div>`;
+  });
+  const gt_d=gpTot(round[gp],"dom"),gt_m=gpTot(round[gp],"max");
+  return`<div class="gp-sec">
+    <div class="gp-hdr">
+      <span class="gp-title">${is2?"GP 2":"GP 1"}</span>
+      ${is2?'<span class="swap-badge">🔄 Characters swapped</span>':""}
+    </div>
+    <div class="char-tags">
+      <span class="ctag dom">Dom — ${domC.char} / ${domC.veh}</span>
+      <span class="ctag max">Max — ${maxC.char} / ${maxC.veh}</span>
+    </div>
+    <div class="gp-races">${rows}</div>
+    <div class="gp-footer">
+      <span class="gpf-lbl">GP total</span>
+      <span class="gptv dom" id="gptv-${px}${id}-${gp}-dom">${gt_d}</span>
+      <span style="font-size:11px;color:var(--muted);">vs</span>
+      <span class="gptv max" id="gptv-${px}${id}-${gp}-max">${gt_m}</span>
+    </div>
+  </div>`;
+}
+
+function makeRoundCard(round,isDraft){
+  const id=round.id,px=isDraft?"d":"s";
+  const dt=gpTot(round.gp1,"dom")+gpTot(round.gp2,"dom");
+  const mt=gpTot(round.gp1,"max")+gpTot(round.gp2,"max");
+  const any=dt>0||mt>0;
+  let wHTML="";
+  if(any){if(dt>mt)wHTML=`<div class="win-badge dom">🏆 DOM WINS</div>`;else if(mt>dt)wHTML=`<div class="win-badge max">🏆 MAX WINS</div>`;else wHTML=`<div class="win-badge draw">DRAW</div>`;}
+  const sameWC=round.dom.wc===round.max.wc;
+  const badges=sameWC?wcBadge(round.dom.wc):wcBadge(round.dom.wc)+wcBadge(round.max.wc);
+  const racesId=`races-${px}${id}`;
+
+  return`<div id="rc-${px}${id}" class="round-card${isDraft?" is-draft":""}">
+    <div class="rh">
+      <span class="rnum">${isDraft?"IN PROGRESS":"ROUND "+round.num}</span>
+      ${badges}
+      ${!isDraft?'<span class="sub-badge">✓ Saved</span>':""}
+      ${isDraft
+        ?`<button class="btn-del" onclick="discardDraft()" style="margin-left:auto;">✕ Discard</button>`
+        :`<button class="btn-del" onclick="deleteSubmitted(${id})" style="margin-left:auto;">✕ Delete</button>`}
+    </div>
+    <div class="round-pairs">
+      <div class="rp-card dom"><div class="rp-who">Dom</div><div class="rp-char">${round.dom.char}</div><div class="rp-veh">${round.dom.veh}</div><div class="rp-wc">${round.dom.wc}</div></div>
+      <div class="vs-lbl">VS</div>
+      <div class="rp-card max"><div class="rp-who">Max</div><div class="rp-char">${round.max.char}</div><div class="rp-veh">${round.max.veh}</div><div class="rp-wc">${round.max.wc}</div></div>
+    </div>
+    ${isDraft
+      ?`${makeGP(round,"gp1",true)}<div class="divider"></div>${makeGP(round,"gp2",true)}`
+      :`<button class="btn-toggle" id="toggle-${id}" onclick="toggleRaces('${id}','${px}')">▼ Show all races</button>
+        <div id="${racesId}" style="display:none;margin-top:.875rem;">${makeGP(round,"gp1",false)}<div class="divider"></div>${makeGP(round,"gp2",false)}</div>`}
+    <div class="rt">
+      <span class="rt-lbl">ROUND<br>TOTAL</span>
+      <span class="rt-score dom">Dom: <strong id="rtot-${px}${id}-dom">${dt}</strong></span>
+      <span class="rt-score max">Max: <strong id="rtot-${px}${id}-max">${mt}</strong></span>
+      <div id="win-${px}${id}" style="margin-left:auto;">${wHTML}</div>
+    </div>
+    ${isDraft?`<div class="submit-row">
+      <button class="btn btn-submit" id="submit-btn" onclick="submitRound()" disabled>⬆ Submit Round to Database</button>
+      <div class="submit-hint" id="submit-hint">Fill every track and both positions to unlock submit.</div>
+    </div>`:""}
+  </div>`;
+}
+
+function toggleRaces(id,px){
+  const el=document.getElementById(`races-${px}${id}`),btn=document.getElementById(`toggle-${id}`);
+  const open=el.style.display==="none";
+  el.style.display=open?"block":"none";
+  btn.textContent=(open?"▲":"▼")+" "+(open?"Hide":"Show")+" all races";
+}
+
+function renderRounds(){
+  const c=document.getElementById("rounds-container");
+  const parts=[];
+  if(draft)parts.push(makeRoundCard(draft,true));
+  [...submitted].reverse().forEach(r=>parts.push(makeRoundCard(r,false)));
+  c.innerHTML=parts.length?parts.join(""):'<div class="empty">Randomise some pairs above to start your first round 🏎️</div>';
+  if(draft)checkSubmit();
+  updateSidebar();
+}
+
+function discardDraft(){
+  if(!confirm("Discard this round and all its scores?"))return;
+  draft=null;saveAll();renderRounds();
+}
+function deleteSubmitted(id){
+  if(!confirm("Permanently delete this round from the database?"))return;
+  submitted=submitted.filter(r=>r.id!==id);submitted.forEach((r,i)=>r.num=i+1);
+  saveAll();renderRounds();
+}
+function deleteFromStats(id){
+  if(!confirm("Remove this round from the database?"))return;
+  submitted=submitted.filter(r=>r.id!==id);submitted.forEach((r,i)=>r.num=i+1);
+  saveAll();renderRounds();renderStats();
+}
+function updateSidebar(){
+  const el=document.getElementById("sb-footer");if(!el)return;
+  let dw=0,mw=0,dr=0;
+  submitted.forEach(r=>{
+    const d=gpTot(r.gp1,"dom")+gpTot(r.gp2,"dom"),m=gpTot(r.gp1,"max")+gpTot(r.gp2,"max");
+    if(d>m)dw++;else if(m>d)mw++;else dr++;
+  });
+  el.innerHTML=`<div class="sb-stat">Submitted: <strong>${submitted.length}</strong></div>
+    <div class="sb-stat" style="color:var(--p1);">Dom: <strong>${dw}W</strong></div>
+    <div class="sb-stat" style="color:var(--p2);">Max: <strong>${mw}W</strong></div>
+    ${dr?`<div class="sb-stat">Draws: <strong>${dr}</strong></div>`:""}`;
+}
+
+/* ═══ STATS PAGE ═══ */
+function renderStats(){
+  const el=document.getElementById("stats-content");
+  if(!submitted.length){el.innerHTML='<div class="empty">No submitted rounds yet 📊</div>';return;}
+  let dW=0,mW=0,draws=0;
+  const wcP={small:{dom:[],max:[]},medium:{dom:[],max:[]},large:{dom:[],max:[]}};
+  const typeP={kart:{dom:[],max:[]},bike:{dom:[],max:[]}};
+  const vehP={},trackRec={};
+  let domRaces=[],maxRaces=[];
+
+  submitted.forEach(r=>{
+    const d=gpTot(r.gp1,"dom")+gpTot(r.gp2,"dom"),m=gpTot(r.gp1,"max")+gpTot(r.gp2,"max");
+    if(d>m)dW++;else if(m>d)mW++;else draws++;
+    function acc(race,dv,mv,dw,mw){
+      const dp=pts(race.domPos),mp=pts(race.maxPos);
+      domRaces.push({pts:dp,track:race.track,char:r.dom.char,veh:dv,wc:dw});
+      maxRaces.push({pts:mp,track:race.track,char:r.max.char,veh:mv,wc:mw});
+      wcP[dw].dom.push(dp);wcP[mw].max.push(mp);
+      const dtk=BIKE_SET.has(dv)?"bike":"kart",mtk=BIKE_SET.has(mv)?"bike":"kart";
+      typeP[dtk].dom.push(dp);typeP[mtk].max.push(mp);
+      if(!vehP[dv])vehP[dv]={dom:[],max:[]};if(!vehP[mv])vehP[mv]={dom:[],max:[]};
+      vehP[dv].dom.push(dp);vehP[mv].max.push(mp);
+      if(race.track){if(!trackRec[race.track])trackRec[race.track]={dom:0,max:0,tie:0};
+        if(dp>mp)trackRec[race.track].dom++;else if(mp>dp)trackRec[race.track].max++;else trackRec[race.track].tie++;}
+    }
+    r.gp1.forEach(race=>acc(race,r.dom.veh,r.max.veh,r.dom.wc,r.max.wc));
+    r.gp2.forEach(race=>acc(race,r.max.veh,r.dom.veh,r.max.wc,r.dom.wc));
+  });
+
+  const total=dW+mW+draws,maxW=Math.max(dW,mW)||1;
+  const dBest=domRaces.reduce((b,r)=>r.pts>b.pts?r:b,{pts:-1});
+  const mBest=maxRaces.reduce((b,r)=>r.pts>b.pts?r:b,{pts:-1});
+
+  function wcTable(){return["small","medium","large"].map(wc=>{
+    const da=avg(wcP[wc].dom),ma=avg(wcP[wc].max),w=da!==null&&ma!==null?(da>ma?"dom":ma>da?"max":"tie"):"";
+    return`<tr><td style="text-transform:capitalize;">${wc}</td><td class="dom-val">${fa(da)} <span style="font-size:10px;color:var(--muted);">(${wcP[wc].dom.length})</span></td><td class="max-val">${fa(ma)} <span style="font-size:10px;color:var(--muted);">(${wcP[wc].max.length})</span></td><td>${w?`<span class="pw ${w}">${w==="tie"?"Tie":w==="dom"?"Dom":"Max"}</span>`:""}</td></tr>`;
+  }).join("");}
+  function typeTable(){return["kart","bike"].map(t=>{
+    const da=avg(typeP[t].dom),ma=avg(typeP[t].max),w=da!==null&&ma!==null?(da>ma?"dom":ma>da?"max":"tie"):"";
+    return`<tr><td style="text-transform:capitalize;">${t}</td><td class="dom-val">${fa(da)}</td><td class="max-val">${fa(ma)}</td><td>${w?`<span class="pw ${w}">${w==="tie"?"Tie":w==="dom"?"Dom":"Max"}</span>`:""}</td></tr>`;
+  }).join("");}
+  function vehTable(who){
+    const vehs=Object.entries(vehP).filter(([,v])=>v[who].length>=2).sort((a,b)=>avg(b[1][who])-avg(a[1][who])).slice(0,5);
+    if(!vehs.length)return`<div class="no-data">Need ≥2 races per vehicle to show data</div>`;
+    return`<table class="pt"><thead><tr><th>Vehicle</th><th>Avg</th><th>Races</th></tr></thead><tbody>`+
+      vehs.map(([v,data])=>`<tr><td>${v}</td><td class="${who}-val">${fa(avg(data[who]))}</td><td style="color:var(--muted);">${data[who].length}</td></tr>`).join("")+`</tbody></table>`;
+  }
+
+  const trackRows=Object.entries(trackRec).filter(([,v])=>v.dom+v.max+v.tie>=2)
+    .sort((a,b)=>(b[1].dom+b[1].max+b[1].tie)-(a[1].dom+a[1].max+a[1].tie))
+    .map(([track,rec])=>{
+      const w=rec.dom>rec.max?"dom":rec.max>rec.dom?"max":"tie";
+      return`<tr><td>${track}</td><td class="dom-val" style="text-align:center;">${rec.dom}</td><td class="max-val" style="text-align:center;">${rec.max}</td><td style="text-align:center;color:var(--muted);">${rec.tie}</td><td>${w!=="tie"?`<span class="pw ${w}">${w==="dom"?"Dom":"Max"}</span>`:`<span style="color:var(--muted);font-size:11px;">Even</span>`}</td></tr>`;
+    }).join("");
+
+  const STAT_KEYS=["speed","offroad","handling","drift","miniTurbo"];
+  const byKey={};STAT_KEYS.forEach(k=>byKey[k]=[]);
+  Object.entries(TRACK_KEY).forEach(([t,{key}])=>byKey[key].push(t));
+  const allV=Object.entries(VEH_STATS);
+  function topVehs(key){return allV.sort((a,b)=>b[1][key]-a[1][key]).slice(0,5).map(([v])=>v);}
+
+  const recCards=STAT_KEYS.map(key=>{
+    const info=STAT_INFO[key],tracks=byKey[key],vehs=topVehs(key);
+    return`<div class="trc-card"><div class="trc-stat ${key}">${info.label}</div><div class="trc-desc">${info.desc}</div><div class="trc-tl">KEY TRACKS</div><div class="trc-tracks">${tracks.slice(0,4).join(", ")}${tracks.length>4?` +${tracks.length-4} more`:""}</div><div class="trc-tl">TOP VEHICLES</div><div class="trc-vehs">${vehs.map(v=>`<span class="trc-veh">${v}</span>`).join("")}</div></div>`;
+  }).join("");
+
+  const mgmtRows=[...submitted].reverse().map(r=>{
+    const d=gpTot(r.gp1,"dom")+gpTot(r.gp2,"dom"),m=gpTot(r.gp1,"max")+gpTot(r.gp2,"max");
+    const rc=d>m?"dom":m>d?"max":"";
+    const rt=d>m?`Dom wins (${d}–${m})`:m>d?`Max wins (${m}–${d})`:`Draw (${d}–${m})`;
+    return`<div class="mgmt-row">
+      <span class="mgmt-num">RND ${r.num}</span>
+      <div class="mgmt-info">
+        <div class="mgmt-chars"><span style="color:var(--p1);">${r.dom.char}</span> vs <span style="color:var(--p2);">${r.max.char}</span></div>
+        <div class="mgmt-result ${rc}">${rt}</div>
+      </div>
+      <button class="btn-del" onclick="deleteFromStats(${r.id})">✕ Remove</button>
+    </div>`;
+  }).join("");
+
+  el.innerHTML=`<div class="stats-grid">
+
+    <div class="sc full"><div class="sc-title">MANAGE ROUNDS</div>${mgmtRows}</div>
+
+    <div class="sc full">
+      <div class="sc-title">OVERALL RECORD — ${total} round${total!==1?"s":""}</div>
+      <div class="record-row"><span class="rec-name dom">Dom</span><div class="rec-bar-wrap"><div class="rec-bar dom" style="width:${Math.round(dW/maxW*100)}%"></div></div><span class="rec-val dom">${dW}</span></div>
+      <div class="record-row"><span class="rec-name max">Max</span><div class="rec-bar-wrap"><div class="rec-bar max" style="width:${Math.round(mW/maxW*100)}%"></div></div><span class="rec-val max">${mW}</span></div>
+      ${draws?`<div style="font-size:12px;color:var(--muted);margin-top:4px;">${draws} draw${draws!==1?"s":""}</div>`:""}
+    </div>
+
+    <div class="sc">
+      <div class="sc-title">BEST SINGLE RACE</div>
+      <div class="best-item"><div class="best-who dom">Dom</div>${dBest.pts>=0?`<div class="best-main">${dBest.pts} pts</div><div class="best-detail">${dBest.track||"?"}<br>${dBest.char} / ${dBest.veh}</div>`:`<div class="no-data">No data yet</div>`}</div>
+      <div class="best-item"><div class="best-who max">Max</div>${mBest.pts>=0?`<div class="best-main">${mBest.pts} pts</div><div class="best-detail">${mBest.track||"?"}<br>${mBest.char} / ${mBest.veh}</div>`:`<div class="no-data">No data yet</div>`}</div>
+    </div>
+
+    <div class="sc">
+      <div class="sc-title">KART vs BIKE</div>
+      <div class="sc-sub">Avg race pts by vehicle type</div>
+      <table class="pt"><thead><tr><th>Type</th><th style="color:var(--p1);">Dom</th><th style="color:var(--p2);">Max</th><th>Edge</th></tr></thead><tbody>${typeTable()}</tbody></table>
+    </div>
+
+    <div class="sc full">
+      <div class="sc-title">AVG PTS BY WEIGHT CLASS</div>
+      <div class="sc-sub">Average race points per character class played</div>
+      <table class="pt"><thead><tr><th>Class</th><th style="color:var(--p1);">Dom</th><th style="color:var(--p2);">Max</th><th>Edge</th></tr></thead><tbody>${wcTable()}</tbody></table>
+    </div>
+
+    <div class="sc"><div class="sc-title">DOM'S TOP VEHICLES</div><div class="sc-sub">Avg pts, min. 2 races</div>${vehTable("dom")}</div>
+    <div class="sc"><div class="sc-title">MAX'S TOP VEHICLES</div><div class="sc-sub">Avg pts, min. 2 races</div>${vehTable("max")}</div>
+
+    <div class="sc full">
+      <div class="sc-title">TRACK WINS (≥2 races on same track)</div>
+      ${trackRows?`<table class="pt"><thead><tr><th>Track</th><th style="color:var(--p1);text-align:center;">Dom</th><th style="color:var(--p2);text-align:center;">Max</th><th style="text-align:center;color:var(--muted);">Ties</th><th>Edge</th></tr></thead><tbody>${trackRows}</tbody></table>`:`<div class="no-data">Race the same track multiple times to see trends here.</div>`}
+    </div>
+
+    <div class="sc full">
+      <div class="sc-title">TRACK TYPE VEHICLE GUIDE</div>
+      <div class="sc-sub" style="margin-bottom:1rem;">Official MK Wii stats — what matters on each track type</div>
+      <div class="trc-grid">${recCards}</div>
+    </div>
+
+  </div>`;
+}
+
+/* ═══ INIT ═══ */
+loadAll();renderRounds();
+</script>
+</body>
+</html>
