@@ -179,6 +179,9 @@ select option{background:#111827;font-size:14px;}
 .submit-hint{font-size:12px;color:var(--muted);margin-top:8px;}
 .divider{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 .empty{text-align:center;padding:2.5rem 1rem;color:var(--muted);font-size:14px;}
+.manual-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.manual-who{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;}
+.manual-who.dom{color:var(--p1);}.manual-who.max{color:var(--p2);}
 
 /* ── STATS PAGE ── */
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:.875rem;margin-bottom:.875rem;}
@@ -297,9 +300,25 @@ select option{background:#111827;font-size:14px;}
       <div class="ph-sub">Randomise, race two GPs, submit the round</div>
     </div>
     <div class="card">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
         <span style="font-family:'Press Start 2P',cursive;font-size:8px;color:var(--gold);line-height:1.8;">PICK YOUR<br>CHARACTERS</span>
-        <button class="btn btn-gold" onclick="generatePairs()" style="margin-left:auto;">🎲 Randomise</button>
+        <button class="btn btn-outline" id="manual-toggle-btn" onclick="toggleManual()" style="margin-left:auto;font-size:13px;">✏️ Manual</button>
+        <button class="btn btn-gold" onclick="generatePairs()">🎲 Randomise</button>
+      </div>
+      <div id="manual-form" style="display:none;padding:.875rem;background:var(--surface);border-radius:10px;margin-bottom:1rem;border:1px solid var(--border2);">
+        <div class="manual-grid">
+          <div>
+            <div class="manual-who dom">Dom</div>
+            <select id="m-dom-char" class="tsel" onchange="updateManualVehs('dom')" style="margin-bottom:6px;"></select>
+            <select id="m-dom-veh" class="tsel"></select>
+          </div>
+          <div>
+            <div class="manual-who max">Max</div>
+            <select id="m-max-char" class="tsel" onchange="updateManualVehs('max')" style="margin-bottom:6px;"></select>
+            <select id="m-max-veh" class="tsel"></select>
+          </div>
+        </div>
+        <button class="btn btn-green" onclick="applyManual()" style="margin-top:10px;width:100%;">Use these pairs</button>
       </div>
       <div id="gen-out"></div>
       <div id="add-row" class="add-row" style="display:none;">
@@ -435,7 +454,59 @@ function showPage(p){
   if(p==="stats")renderStats();
 }
 
-/* ═══ GENERATOR ═══ */
+function buildCharOpts(sel){
+  let h=`<option value="">— Character —</option>`;
+  ["small","medium","large"].forEach(wc=>{
+    h+=`<optgroup label="${wc[0].toUpperCase()+wc.slice(1)} weight">`;
+    ALL_CHARS.filter(c=>c.wc===wc).forEach(c=>{h+=`<option value="${c.n}"${c.n===sel?" selected":""}>${c.n}</option>`;});
+    h+=`</optgroup>`;
+  });
+  return h;
+}
+function buildVehOpts(wc,sel){
+  if(!wc)return`<option value="">— Pick character first —</option>`;
+  let h=`<option value="">— Vehicle —</option>`;
+  VEHS[wc].forEach(v=>{h+=`<option value="${v}"${v===sel?" selected":""}>${v}</option>`;});
+  return h;
+}
+function toggleManual(){
+  const form=document.getElementById("manual-form");
+  const btn=document.getElementById("manual-toggle-btn");
+  const open=form.style.display!=="none";
+  if(open){form.style.display="none";btn.textContent="\u270f\ufe0f Manual";}
+  else{
+    const dc=document.getElementById("m-dom-char");
+    const mc=document.getElementById("m-max-char");
+    if(!dc.innerHTML){dc.innerHTML=buildCharOpts("");document.getElementById("m-dom-veh").innerHTML=buildVehOpts("","");}
+    if(!mc.innerHTML){mc.innerHTML=buildCharOpts("");document.getElementById("m-max-veh").innerHTML=buildVehOpts("","");}
+    form.style.display="block";btn.textContent="\u2715 Close";
+  }
+}
+function updateManualVehs(who){
+  const charSel=document.getElementById(`m-${who}-char`);
+  const char=ALL_CHARS.find(c=>c.n===charSel.value);
+  document.getElementById(`m-${who}-veh`).innerHTML=buildVehOpts(char?char.wc:null,"");
+}
+function applyManual(){
+  const dc=document.getElementById("m-dom-char").value;
+  const dv=document.getElementById("m-dom-veh").value;
+  const mc=document.getElementById("m-max-char").value;
+  const mv=document.getElementById("m-max-veh").value;
+  if(!dc||!dv||!mc||!mv){alert("Please select a character and vehicle for both players.");return;}
+  const domChar=ALL_CHARS.find(c=>c.n===dc);
+  const maxChar=ALL_CHARS.find(c=>c.n===mc);
+  curPairs={dom:{char:dc,wc:domChar.wc,veh:dv},max:{char:mc,wc:maxChar.wc,veh:mv}};
+  document.getElementById("gen-out").innerHTML=`
+    <div class="pair-display">
+      <div class="pair-card dom"><div class="pair-lbl">Dom</div><div class="pair-char">${dc}</div><div class="pair-veh">${dv}</div><div class="pair-wc">${domChar.wc}</div></div>
+      <div class="vs-lbl">VS</div>
+      <div class="pair-card max"><div class="pair-lbl">Max</div><div class="pair-char">${mc}</div><div class="pair-veh">${mv}</div><div class="pair-wc">${maxChar.wc}</div></div>
+    </div>`;
+  document.getElementById("add-row").style.display="flex";
+  document.getElementById("manual-form").style.display="none";
+  document.getElementById("manual-toggle-btn").textContent="\u270f\ufe0f Manual";
+}
+
 function generatePairs(){
   const chars=[...ALL_CHARS];
   const c1=chars.splice(Math.floor(Math.random()*chars.length),1)[0],c2=rnd(chars);
@@ -667,8 +738,19 @@ function renderStats(){
   });
 
   const total=dW+mW+draws,maxW=Math.max(dW,mW)||1;
-  const dBest=domRaces.reduce((b,r)=>r.pts>b.pts?r:b,{pts:-1});
-  const mBest=maxRaces.reduce((b,r)=>r.pts>b.pts?r:b,{pts:-1});
+
+  // Best 8-race GP per player
+  let dBestGP={pts:-1},mBestGP={pts:-1};
+  submitted.forEach(r=>{
+    // GP1: dom plays dom char/veh, max plays max char/veh
+    const dg1=gpTot(r.gp1,"dom"),mg1=gpTot(r.gp1,"max");
+    if(dg1>dBestGP.pts)dBestGP={pts:dg1,char:r.dom.char,veh:r.dom.veh,round:r.num,gp:1};
+    if(mg1>mBestGP.pts)mBestGP={pts:mg1,char:r.max.char,veh:r.max.veh,round:r.num,gp:1};
+    // GP2: dom plays max char/veh (switched), max plays dom char/veh
+    const dg2=gpTot(r.gp2,"dom"),mg2=gpTot(r.gp2,"max");
+    if(dg2>dBestGP.pts)dBestGP={pts:dg2,char:r.max.char,veh:r.max.veh,round:r.num,gp:2};
+    if(mg2>mBestGP.pts)mBestGP={pts:mg2,char:r.dom.char,veh:r.dom.veh,round:r.num,gp:2};
+  });
 
   function wcTable(){return["small","medium","large"].map(wc=>{
     const da=avg(wcP[wc].dom),ma=avg(wcP[wc].max),w=da!==null&&ma!==null?(da>ma?"dom":ma>da?"max":"tie"):"";
@@ -685,22 +767,17 @@ function renderStats(){
       vehs.map(([v,data])=>`<tr><td>${v}</td><td class="${who}-val">${fa(avg(data[who]))}</td><td style="color:var(--muted);">${data[who].length}</td></tr>`).join("")+`</tbody></table>`;
   }
 
-  const trackRows=Object.entries(trackRec).filter(([,v])=>v.dom+v.max+v.tie>=2)
-    .sort((a,b)=>(b[1].dom+b[1].max+b[1].tie)-(a[1].dom+a[1].max+a[1].tie))
-    .map(([track,rec])=>{
-      const w=rec.dom>rec.max?"dom":rec.max>rec.dom?"max":"tie";
-      return`<tr><td>${track}</td><td class="dom-val" style="text-align:center;">${rec.dom}</td><td class="max-val" style="text-align:center;">${rec.max}</td><td style="text-align:center;color:var(--muted);">${rec.tie}</td><td>${w!=="tie"?`<span class="pw ${w}">${w==="dom"?"Dom":"Max"}</span>`:`<span style="color:var(--muted);font-size:11px;">Even</span>`}</td></tr>`;
-    }).join("");
-
-  const STAT_KEYS=["speed","offroad","handling","drift","miniTurbo"];
-  const byKey={};STAT_KEYS.forEach(k=>byKey[k]=[]);
-  Object.entries(TRACK_KEY).forEach(([t,{key}])=>byKey[key].push(t));
-  const allV=Object.entries(VEH_STATS);
-  function topVehs(key){return allV.sort((a,b)=>b[1][key]-a[1][key]).slice(0,5).map(([v])=>v);}
-
-  const recCards=STAT_KEYS.map(key=>{
-    const info=STAT_INFO[key],tracks=byKey[key],vehs=topVehs(key);
-    return`<div class="trc-card"><div class="trc-stat ${key}">${info.label}</div><div class="trc-desc">${info.desc}</div><div class="trc-tl">KEY TRACKS</div><div class="trc-tracks">${tracks.slice(0,4).join(", ")}${tracks.length>4?` +${tracks.length-4} more`:""}</div><div class="trc-tl">TOP VEHICLES</div><div class="trc-vehs">${vehs.map(v=>`<span class="trc-veh">${v}</span>`).join("")}</div></div>`;
+  // Build track wins rows for every track in order
+  const allTracksList=TRACKS.flatMap(g=>g.tracks);
+  const trackRows=allTracksList.map(track=>{
+    const rec=trackRec[track]||{dom:0,max:0};
+    const w=rec.dom>rec.max?"dom":rec.max>rec.dom?"max":"";
+    return`<tr>
+      <td>${track}</td>
+      <td class="dom-val" style="text-align:center;">${rec.dom}</td>
+      <td class="max-val" style="text-align:center;">${rec.max}</td>
+      <td>${w?`<span class="pw ${w}">${w==="dom"?"Dom":"Max"}</span>`:`<span style="color:var(--muted);font-size:11px;">—</span>`}</td>
+    </tr>`;
   }).join("");
 
   const mgmtRows=[...submitted].reverse().map(r=>{
@@ -729,9 +806,9 @@ function renderStats(){
     </div>
 
     <div class="sc">
-      <div class="sc-title">BEST SINGLE RACE</div>
-      <div class="best-item"><div class="best-who dom">Dom</div>${dBest.pts>=0?`<div class="best-main">${dBest.pts} pts</div><div class="best-detail">${dBest.track||"?"}<br>${dBest.char} / ${dBest.veh}</div>`:`<div class="no-data">No data yet</div>`}</div>
-      <div class="best-item"><div class="best-who max">Max</div>${mBest.pts>=0?`<div class="best-main">${mBest.pts} pts</div><div class="best-detail">${mBest.track||"?"}<br>${mBest.char} / ${mBest.veh}</div>`:`<div class="no-data">No data yet</div>`}</div>
+      <div class="sc-title">BEST 8-RACE GP</div>
+      <div class="best-item"><div class="best-who dom">Dom</div>${dBestGP.pts>=0?`<div class="best-main">${dBestGP.pts} pts</div><div class="best-detail">Round ${dBestGP.round}, GP ${dBestGP.gp}<br>${dBestGP.char} / ${dBestGP.veh}</div>`:`<div class="no-data">No data yet</div>`}</div>
+      <div class="best-item"><div class="best-who max">Max</div>${mBestGP.pts>=0?`<div class="best-main">${mBestGP.pts} pts</div><div class="best-detail">Round ${mBestGP.round}, GP ${mBestGP.gp}<br>${mBestGP.char} / ${mBestGP.veh}</div>`:`<div class="no-data">No data yet</div>`}</div>
     </div>
 
     <div class="sc">
@@ -750,14 +827,8 @@ function renderStats(){
     <div class="sc"><div class="sc-title">MAX'S TOP VEHICLES</div><div class="sc-sub">Avg pts, min. 2 races</div>${vehTable("max")}</div>
 
     <div class="sc full">
-      <div class="sc-title">TRACK WINS (≥2 races on same track)</div>
-      ${trackRows?`<table class="pt"><thead><tr><th>Track</th><th style="color:var(--p1);text-align:center;">Dom</th><th style="color:var(--p2);text-align:center;">Max</th><th style="text-align:center;color:var(--muted);">Ties</th><th>Edge</th></tr></thead><tbody>${trackRows}</tbody></table>`:`<div class="no-data">Race the same track multiple times to see trends here.</div>`}
-    </div>
-
-    <div class="sc full">
-      <div class="sc-title">TRACK TYPE VEHICLE GUIDE</div>
-      <div class="sc-sub" style="margin-bottom:1rem;">Official MK Wii stats — what matters on each track type</div>
-      <div class="trc-grid">${recCards}</div>
+      <div class="sc-title">TRACK WINS</div>
+      <table class="pt"><thead><tr><th>Track</th><th style="color:var(--p1);text-align:center;">Dom</th><th style="color:var(--p2);text-align:center;">Max</th><th>Lead</th></tr></thead><tbody>${trackRows}</tbody></table>
     </div>
 
   </div>`;
