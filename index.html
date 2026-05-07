@@ -723,12 +723,15 @@ function renderStats(){
   let dW=0,mW=0,draws=0;
   const wcP={small:{dom:[],max:[]},medium:{dom:[],max:[]},large:{dom:[],max:[]}};
   const typeP={kart:{dom:[],max:[]},bike:{dom:[],max:[]}};
-  const vehP={},trackRec={};
-  let domRaces=[],maxRaces=[];
+  const vehP={},trackRec={},trackPts={};
+  let domRaces=[],maxRaces=[],domGPs=[],maxGPs=[];
 
   submitted.forEach(r=>{
     const d=gpTot(r.gp1,"dom")+gpTot(r.gp2,"dom"),m=gpTot(r.gp1,"max")+gpTot(r.gp2,"max");
     if(d>m)dW++;else if(m>d)mW++;else draws++;
+    // Collect per-GP scores
+    domGPs.push(gpTot(r.gp1,"dom"),gpTot(r.gp2,"dom"));
+    maxGPs.push(gpTot(r.gp1,"max"),gpTot(r.gp2,"max"));
     function acc(race,dv,mv,dw,mw){
       const dp=pts(race.domPos),mp=pts(race.maxPos);
       domRaces.push({pts:dp,track:race.track,char:r.dom.char,veh:dv,wc:dw});
@@ -738,12 +741,19 @@ function renderStats(){
       typeP[dtk].dom.push(dp);typeP[mtk].max.push(mp);
       if(!vehP[dv])vehP[dv]={dom:[],max:[]};if(!vehP[mv])vehP[mv]={dom:[],max:[]};
       vehP[dv].dom.push(dp);vehP[mv].max.push(mp);
-      if(race.track){if(!trackRec[race.track])trackRec[race.track]={dom:0,max:0,tie:0};
-        if(dp>mp)trackRec[race.track].dom++;else if(mp>dp)trackRec[race.track].max++;else trackRec[race.track].tie++;}
+      if(race.track){
+        if(!trackRec[race.track])trackRec[race.track]={dom:0,max:0};
+        if(dp>mp)trackRec[race.track].dom++;else if(mp>dp)trackRec[race.track].max++;
+        if(!trackPts[race.track])trackPts[race.track]={dom:[],max:[]};
+        trackPts[race.track].dom.push(dp);trackPts[race.track].max.push(mp);
+      }
     }
     r.gp1.forEach(race=>acc(race,r.dom.veh,r.max.veh,r.dom.wc,r.max.wc));
     r.gp2.forEach(race=>acc(race,r.max.veh,r.dom.veh,r.max.wc,r.dom.wc));
   });
+
+  const domTotalPts=domRaces.reduce((s,r)=>s+r.pts,0);
+  const maxTotalPts=maxRaces.reduce((s,r)=>s+r.pts,0);
 
   const total=dW+mW+draws,maxW=Math.max(dW,mW)||1;
 
@@ -760,6 +770,8 @@ function renderStats(){
     if(mg2>mBestGP.pts)mBestGP={pts:mg2,char:r.dom.char,veh:r.dom.veh,round:r.num,gp:2};
   });
 
+  const domAvgGP=avg(domGPs),maxAvgGP=avg(maxGPs);
+
   function wcTable(){return["small","medium","large"].map(wc=>{
     const da=avg(wcP[wc].dom),ma=avg(wcP[wc].max),w=da!==null&&ma!==null?(da>ma?"dom":ma>da?"max":"tie"):"";
     return`<tr><td style="text-transform:capitalize;">${wc}</td><td class="dom-val">${fa(da)} <span style="font-size:10px;color:var(--muted);">(${wcP[wc].dom.length})</span></td><td class="max-val">${fa(ma)} <span style="font-size:10px;color:var(--muted);">(${wcP[wc].max.length})</span></td><td>${w?`<span class="pw ${w}">${w==="tie"?"Tie":w==="dom"?"Dom":"Max"}</span>`:""}</td></tr>`;
@@ -775,16 +787,20 @@ function renderStats(){
       vehs.map(([v,data])=>`<tr><td>${v}</td><td class="${who}-val">${fa(avg(data[who]))}</td><td style="color:var(--muted);">${data[who].length}</td></tr>`).join("")+`</tbody></table>`;
   }
 
-  // Build track wins rows for every track in order
+  // Build track stats rows for every track in order
   const allTracksList=TRACKS.flatMap(g=>g.tracks);
   const trackRows=allTracksList.map(track=>{
     const rec=trackRec[track]||{dom:0,max:0};
-    const w=rec.dom>rec.max?"dom":rec.max>rec.dom?"max":"";
+    const tp=trackPts[track]||{dom:[],max:[]};
+    const da=avg(tp.dom),ma=avg(tp.max);
+    const lead=da!==null&&ma!==null?(da>ma?"dom":ma>da?"max":""):(rec.dom>rec.max?"dom":rec.max>rec.dom?"max":"");
     return`<tr>
       <td>${track}</td>
       <td class="dom-val" style="text-align:center;">${rec.dom}</td>
       <td class="max-val" style="text-align:center;">${rec.max}</td>
-      <td>${w?`<span class="pw ${w}">${w==="dom"?"Dom":"Max"}</span>`:`<span style="color:var(--muted);font-size:11px;">—</span>`}</td>
+      <td class="dom-val" style="text-align:center;">${fa(da)}</td>
+      <td class="max-val" style="text-align:center;">${fa(ma)}</td>
+      <td>${lead?`<span class="pw ${lead}">${lead==="dom"?"Dom":"Max"}</span>`:`<span style="color:var(--muted);font-size:11px;">—</span>`}</td>
     </tr>`;
   }).join("");
 
@@ -811,12 +827,17 @@ function renderStats(){
       <div class="record-row"><span class="rec-name dom">Dom</span><div class="rec-bar-wrap"><div class="rec-bar dom" style="width:${Math.round(dW/maxW*100)}%"></div></div><span class="rec-val dom">${dW}</span></div>
       <div class="record-row"><span class="rec-name max">Max</span><div class="rec-bar-wrap"><div class="rec-bar max" style="width:${Math.round(mW/maxW*100)}%"></div></div><span class="rec-val max">${mW}</span></div>
       ${draws?`<div style="font-size:12px;color:var(--muted);margin-top:4px;">${draws} draw${draws!==1?"s":""}</div>`:""}
+      <div style="display:flex;gap:16px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--muted);align-self:center;">Total points</span>
+        <span style="font-size:14px;font-weight:900;color:var(--p1);">${domTotalPts}</span>
+        <span style="font-size:14px;font-weight:900;color:var(--p2);">${maxTotalPts}</span>
+      </div>
     </div>
 
     <div class="sc">
       <div class="sc-title">BEST 8-RACE GP</div>
-      <div class="best-item"><div class="best-who dom">Dom</div>${dBestGP.pts>=0?`<div class="best-main">${dBestGP.pts} pts</div><div class="best-detail">Round ${dBestGP.round}, GP ${dBestGP.gp}<br>${dBestGP.char} / ${dBestGP.veh}</div>`:`<div class="no-data">No data yet</div>`}</div>
-      <div class="best-item"><div class="best-who max">Max</div>${mBestGP.pts>=0?`<div class="best-main">${mBestGP.pts} pts</div><div class="best-detail">Round ${mBestGP.round}, GP ${mBestGP.gp}<br>${mBestGP.char} / ${mBestGP.veh}</div>`:`<div class="no-data">No data yet</div>`}</div>
+      <div class="best-item"><div class="best-who dom">Dom</div>${dBestGP.pts>=0?`<div class="best-main">${dBestGP.pts} pts</div><div class="best-detail">Round ${dBestGP.round}, GP ${dBestGP.gp}<br>${dBestGP.char} / ${dBestGP.veh}</div>`:`<div class="no-data">No data yet</div>`}${domAvgGP!==null?`<div style="font-size:12px;color:var(--muted);margin-top:5px;">Avg GP: <strong style="color:var(--p1);">${fa(domAvgGP)}</strong> pts</div>`:""}</div>
+      <div class="best-item"><div class="best-who max">Max</div>${mBestGP.pts>=0?`<div class="best-main">${mBestGP.pts} pts</div><div class="best-detail">Round ${mBestGP.round}, GP ${mBestGP.gp}<br>${mBestGP.char} / ${mBestGP.veh}</div>`:`<div class="no-data">No data yet</div>`}${maxAvgGP!==null?`<div style="font-size:12px;color:var(--muted);margin-top:5px;">Avg GP: <strong style="color:var(--p2);">${fa(maxAvgGP)}</strong> pts</div>`:""}</div>
     </div>
 
     <div class="sc">
@@ -835,8 +856,20 @@ function renderStats(){
     <div class="sc"><div class="sc-title">MAX'S TOP VEHICLES</div><div class="sc-sub">Avg pts, min. 2 races</div>${vehTable("max")}</div>
 
     <div class="sc full">
-      <div class="sc-title">TRACK WINS</div>
-      <table class="pt"><thead><tr><th>Track</th><th style="color:var(--p1);text-align:center;">Dom</th><th style="color:var(--p2);text-align:center;">Max</th><th>Lead</th></tr></thead><tbody>${trackRows}</tbody></table>
+      <div class="sc-title">TRACK STATS</div>
+      <div style="overflow-x:auto;">
+        <table class="pt" style="min-width:480px;">
+          <thead><tr>
+            <th>Track</th>
+            <th style="color:var(--p1);text-align:center;">Dom W</th>
+            <th style="color:var(--p2);text-align:center;">Max W</th>
+            <th style="color:var(--p1);text-align:center;">Dom Avg</th>
+            <th style="color:var(--p2);text-align:center;">Max Avg</th>
+            <th>Lead</th>
+          </tr></thead>
+          <tbody>${trackRows}</tbody>
+        </table>
+      </div>
     </div>
 
   </div>`;
