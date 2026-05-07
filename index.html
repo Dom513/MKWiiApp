@@ -416,6 +416,13 @@ function saveAll(){
     if(draft)localStorage.setItem("mkwii-draft",JSON.stringify(draft));
     else localStorage.removeItem("mkwii-draft");
     localStorage.setItem("mkwii-db",JSON.stringify(submitted));
+    // Flash the save indicator on the draft card
+    const ind=document.getElementById("draft-save-ind");
+    if(ind&&draft){
+      ind.style.opacity="1";ind.style.color="var(--green)";
+      clearTimeout(window._saveTimer);
+      window._saveTimer=setTimeout(()=>{ind.style.opacity=".35";},1800);
+    }
   }catch(e){}
 }
 function loadAll(){
@@ -551,15 +558,15 @@ function refreshDraft(){
       let t=0;
       draft[gp].forEach((race,i)=>{
         const p=rPts(race,who);t+=p;
-        const e=document.getElementById(`pc-${id}-${gp}-${who}-${i}`);
+        const e=document.getElementById(`pc-d${id}-${gp}-${who}-${i}`);
         if(e){e.textContent=race[who+"Pos"]>0?p:"—";e.className="rscore-pts "+(race[who+"Pos"]>0?who:"dim");}
       });
-      const te=document.getElementById(`gptv-${id}-${gp}-${who}`);if(te)te.textContent=t;
+      const te=document.getElementById(`gptv-d${id}-${gp}-${who}`);if(te)te.textContent=t;
     });
   });
   const dt=gpTot(draft.gp1,"dom")+gpTot(draft.gp2,"dom");
   const mt=gpTot(draft.gp1,"max")+gpTot(draft.gp2,"max");
-  const e1=document.getElementById(`rtot-${draft.id}-dom`),e2=document.getElementById(`rtot-${draft.id}-max`),ew=document.getElementById(`win-${draft.id}`);
+  const e1=document.getElementById(`rtot-d${draft.id}-dom`),e2=document.getElementById(`rtot-d${draft.id}-max`),ew=document.getElementById(`win-d${draft.id}`);
   if(e1)e1.textContent=dt;if(e2)e2.textContent=mt;
   if(ew){
     if(dt===0&&mt===0)ew.innerHTML="";
@@ -637,6 +644,7 @@ function makeRoundCard(round,isDraft){
     <div class="rh">
       <span class="rnum">${isDraft?"IN PROGRESS":"ROUND "+round.num}</span>
       ${badges}
+      ${isDraft?'<span id="draft-save-ind" style="font-size:11px;font-weight:700;color:var(--green);opacity:.35;transition:opacity .4s;">&#10003; Draft saved</span>':""}
       ${!isDraft?'<span class="sub-badge">✓ Saved</span>':""}
       ${isDraft
         ?`<button class="btn-del" onclick="discardDraft()" style="margin-left:auto;">✕ Discard</button>`
