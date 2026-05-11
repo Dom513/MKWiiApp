@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Dom vs Max — MK Wii</title>
+<title>Dom, Max & Fin — MK Wii</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏁</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
@@ -13,6 +13,7 @@
   --gold:#ffd700;--p1:#ff5555;--p1bg:rgba(255,85,85,.1);--p1bd:rgba(255,85,85,.25);
   --p2:#55aaff;--p2bg:rgba(85,170,255,.1);--p2bd:rgba(85,170,255,.25);
   --green:#4dffa0;--muted:rgba(232,237,248,.45);--text:#e8edf8;
+  --p3:#bb77ff;--p3bg:rgba(187,119,255,.1);--p3bd:rgba(187,119,255,.25);
   --sb:170px;--nav-h:62px;
 }
 html{-webkit-text-size-adjust:100%;}
@@ -179,6 +180,40 @@ select option{background:#111827;font-size:14px;}
 .submit-hint{font-size:12px;color:var(--muted);margin-top:8px;}
 .divider{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 .empty{text-align:center;padding:2.5rem 1rem;color:var(--muted);font-size:14px;}
+/* ── MODE TOGGLE ── */
+.mode-toggle{display:flex;gap:4px;padding:3px;background:var(--surface);border-radius:10px;border:1px solid var(--border);}
+.mode-btn{flex:1;padding:7px 12px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;transition:background .15s,color .15s;white-space:nowrap;}
+.mode-btn.active{background:var(--card);color:var(--text);}
+.stats-mode-toggle{display:flex;gap:4px;margin-bottom:1rem;padding:3px;background:var(--surface);border-radius:10px;border:1px solid var(--border);width:fit-content;}
+
+/* ── FIN colour ── */
+.pair-card.fin{background:var(--p3bg);border:1px solid var(--p3bd);}
+.pair-card.fin .pair-lbl{color:var(--p3);}
+.rp-card.fin{background:var(--p3bg);border:1px solid var(--p3bd);}
+.rp-card.fin .rp-who{color:var(--p3);}
+.rscore-who.fin{color:var(--p3);}
+.rscore-pts.fin{color:var(--p3);}
+.ctag.fin{background:var(--p3bg);color:var(--p3);border:1px solid var(--p3bd);}
+.gptv.fin{color:var(--p3);}
+.rt-score.fin{color:var(--p3);}
+.win-badge.fin{background:var(--p3bg);color:var(--p3);border:1px solid var(--p3bd);}
+.rec-name.fin{color:var(--p3);}
+.rec-bar.fin{background:var(--p3);}
+.rec-val.fin{color:var(--p3);}
+.best-who.fin{color:var(--p3);}
+.fin-val{color:var(--p3);font-weight:700;}
+.pw.fin{background:var(--p3bg);color:var(--p3);}
+.mgmt-result.fin{color:var(--p3);}
+
+/* ── 3-player race bottom ── */
+.race-bottom-3p{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+@media(max-width:400px){.race-bottom-3p{grid-template-columns:1fr;gap:3px;}}
+
+/* ── 3p pairs grid ── */
+.pairs-3p{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-items:stretch;animation:fadeIn .3s ease;}
+.pairs-3p .vs-lbl{display:none;}
+@media(max-width:480px){.pairs-3p{grid-template-columns:1fr;}}
+
 .manual-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .manual-who{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;}
 .manual-who.dom{color:var(--p1);}.manual-who.max{color:var(--p2);}
@@ -280,7 +315,7 @@ select option{background:#111827;font-size:14px;}
 <div id="sidebar">
   <div class="sb-logo">
     <div class="sb-logo-text">🏁 MK WII</div>
-    <div class="sb-logo-sub">Dom vs Max</div>
+    <div class="sb-logo-sub">Dom · Max · Fin</div>
   </div>
   <nav class="sb-nav">
     <button class="nav-btn active" id="nav-competition" onclick="showPage('competition')">
@@ -301,29 +336,21 @@ select option{background:#111827;font-size:14px;}
     </div>
     <div class="card">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
-        <span style="font-family:'Press Start 2P',cursive;font-size:8px;color:var(--gold);line-height:1.8;">PICK YOUR<br>CHARACTERS</span>
-        <button class="btn btn-outline" id="manual-toggle-btn" onclick="toggleManual()" style="margin-left:auto;font-size:13px;">✏️ Manual</button>
-        <button class="btn btn-gold" onclick="generatePairs()">🎲 Randomise</button>
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="mode-2p" onclick="setMode('2p')">2 Player</button>
+          <button class="mode-btn" id="mode-3p" onclick="setMode('3p')">3 Player</button>
+        </div>
+        <button class="btn btn-outline" id="manual-toggle-btn" onclick="toggleManual()" style="margin-left:auto;font-size:13px;">&#9998; Manual</button>
+        <button class="btn btn-gold" onclick="generatePairs()">&#127922; Randomise</button>
       </div>
       <div id="manual-form" style="display:none;padding:.875rem;background:var(--surface);border-radius:10px;margin-bottom:1rem;border:1px solid var(--border2);">
-        <div class="manual-grid">
-          <div>
-            <div class="manual-who dom">Dom</div>
-            <select id="m-dom-char" class="tsel" onchange="updateManualVehs('dom')" style="margin-bottom:6px;"></select>
-            <select id="m-dom-veh" class="tsel"></select>
-          </div>
-          <div>
-            <div class="manual-who max">Max</div>
-            <select id="m-max-char" class="tsel" onchange="updateManualVehs('max')" style="margin-bottom:6px;"></select>
-            <select id="m-max-veh" class="tsel"></select>
-          </div>
-        </div>
+        <div id="manual-inner"></div>
         <button class="btn btn-green" onclick="applyManual()" style="margin-top:10px;width:100%;">Use these pairs</button>
       </div>
       <div id="gen-out"></div>
       <div id="add-row" class="add-row" style="display:none;">
         <button class="btn btn-green" onclick="startRound()">+ Start round</button>
-        <button class="btn btn-outline" onclick="generatePairs()">↻ Re-roll</button>
+        <button class="btn btn-outline" onclick="generatePairs()">&#8635; Re-roll</button>
       </div>
     </div>
     <div id="rounds-container"><div class="empty">Randomise some pairs above to start your first round 🏎️</div></div>
@@ -355,10 +382,10 @@ const ALL_CHARS=[
 ];
 const VEHS={
   small:["Bullet Blaster","Booster Seat","Tiny Titan","Blue Falcon","Mini Beast","Cheep Charger","Bullet Bike","Bit Bike","Bubble Bike","Quacker","Magikruiser","Jet Bubble"],
-  medium:["Classic Dragster","Wild Wing","Super Blooper","Daytripper","Sprinter","B Dasher Mk 2","Mach Bike","Sugarscoot","Zip Zip","Sneakster","Dolphin Dasher","Nitrocycle"],
+  medium:["Classic Dragster","Wild Wing","Super Blooper","Daytripper","Sprinter","B Dasher Mk 2","Mach Bike","Sugarscoot","Rapide","Sneakster","Dolphin Dasher","Nitrocycle"],
   large:["Offroader","Flame Flyer","Piranha Prowler","Jetsetter","Honeycoupe","Bowser Bike","Wario Bike","Shooting Star","Spear","Phantom"]
 };
-const BIKE_SET=new Set(["Bullet Bike","Bit Bike","Bubble Bike","Quacker","Magikruiser","Jet Bubble","Mach Bike","Sugarscoot","Zip Zip","Sneakster","Dolphin Dasher","Nitrocycle","Bowser Bike","Wario Bike","Shooting Star","Spear","Phantom"]);
+const BIKE_SET=new Set(["Bullet Bike","Bit Bike","Bubble Bike","Quacker","Magikruiser","Jet Bubble","Mach Bike","Sugarscoot","Rapide","Sneakster","Dolphin Dasher","Nitrocycle","Bowser Bike","Wario Bike","Shooting Star","Spear","Phantom"]);
 const VEH_STATS={
   "Bullet Blaster":{speed:8,offroad:2,handling:4,drift:3,miniTurbo:3},"Booster Seat":{speed:3,offroad:5,handling:8,drift:5,miniTurbo:7},
   "Tiny Titan":{speed:4,offroad:7,handling:6,drift:5,miniTurbo:6},"Blue Falcon":{speed:7,offroad:2,handling:6,drift:5,miniTurbo:4},
@@ -370,7 +397,7 @@ const VEH_STATS={
   "Super Blooper":{speed:4,offroad:7,handling:6,drift:5,miniTurbo:7},"Daytripper":{speed:5,offroad:6,handling:7,drift:6,miniTurbo:7},
   "Sprinter":{speed:8,offroad:2,handling:4,drift:4,miniTurbo:2},"B Dasher Mk 2":{speed:7,offroad:2,handling:4,drift:4,miniTurbo:3},
   "Mach Bike":{speed:7,offroad:3,handling:5,drift:6,miniTurbo:6},"Sugarscoot":{speed:3,offroad:6,handling:8,drift:7,miniTurbo:9},
-  "Zip Zip":{speed:6,offroad:4,handling:6,drift:7,miniTurbo:7},"Sneakster":{speed:8,offroad:2,handling:4,drift:5,miniTurbo:4},
+  "Rapide":{speed:6,offroad:4,handling:6,drift:7,miniTurbo:7},"Sneakster":{speed:8,offroad:2,handling:4,drift:5,miniTurbo:4},
   "Dolphin Dasher":{speed:4,offroad:6,handling:8,drift:8,miniTurbo:9},"Nitrocycle":{speed:7,offroad:2,handling:5,drift:7,miniTurbo:6},
   "Offroader":{speed:4,offroad:10,handling:5,drift:5,miniTurbo:6},"Flame Flyer":{speed:7,offroad:4,handling:4,drift:4,miniTurbo:4},
   "Piranha Prowler":{speed:8,offroad:2,handling:3,drift:3,miniTurbo:2},"Jetsetter":{speed:10,offroad:1,handling:3,drift:3,miniTurbo:1},
@@ -410,25 +437,33 @@ const STAT_INFO={
 };
 
 /* ═══ STATE ═══ */
-let curPairs=null,draft=null,submitted=[];
+let mode="2p"; // "2p" or "3p"
+let curPairs=null,draft=null,draft3p=null,submitted=[],submitted3p=[];
 function saveAll(){
   try{
     if(draft)localStorage.setItem("mkwii-draft",JSON.stringify(draft));
     else localStorage.removeItem("mkwii-draft");
+    if(draft3p)localStorage.setItem("mkwii-draft3p",JSON.stringify(draft3p));
+    else localStorage.removeItem("mkwii-draft3p");
     localStorage.setItem("mkwii-db",JSON.stringify(submitted));
+    localStorage.setItem("mkwii-db3p",JSON.stringify(submitted3p));
     // Flash the save indicator on the draft card
-    const ind=document.getElementById("draft-save-ind");
-    if(ind&&draft){
+    const ind2p=document.getElementById("draft-save-ind-2p");
+    const ind3p=document.getElementById("draft-save-ind-3p");
+    [ind2p&&draft?ind2p:null, ind3p&&draft3p?ind3p:null].forEach(ind=>{
+      if(!ind)return;
       ind.style.opacity="1";ind.style.color="var(--green)";
       clearTimeout(window._saveTimer);
       window._saveTimer=setTimeout(()=>{ind.style.opacity=".35";},1800);
-    }
+    });
   }catch(e){}
 }
 function loadAll(){
   try{
     const d=localStorage.getItem("mkwii-draft");if(d)draft=JSON.parse(d);
+    const d3=localStorage.getItem("mkwii-draft3p");if(d3)draft3p=JSON.parse(d3);
     const s=localStorage.getItem("mkwii-db");if(s)submitted=JSON.parse(s);
+    const s3=localStorage.getItem("mkwii-db3p");if(s3)submitted3p=JSON.parse(s3);
   }catch(e){}
 }
 
@@ -461,6 +496,20 @@ function showPage(p){
   if(p==="stats")renderStats();
 }
 
+/* ═══ MODE ═══ */
+function setMode(m){
+  mode=m;
+  document.getElementById("mode-2p").classList.toggle("active",m==="2p");
+  document.getElementById("mode-3p").classList.toggle("active",m==="3p");
+  // reset generator display
+  curPairs=null;
+  document.getElementById("gen-out").innerHTML="";
+  document.getElementById("add-row").style.display="none";
+  document.getElementById("manual-form").style.display="none";
+  document.getElementById("manual-toggle-btn").textContent="\u270f\ufe0f Manual";
+}
+
+/* ═══ MANUAL PICKER ═══ */
 function buildCharOpts(sel){
   let h=`<option value="">— Character —</option>`;
   ["small","medium","large"].forEach(wc=>{
@@ -482,10 +531,19 @@ function toggleManual(){
   const open=form.style.display!=="none";
   if(open){form.style.display="none";btn.textContent="\u270f\ufe0f Manual";}
   else{
-    const dc=document.getElementById("m-dom-char");
-    const mc=document.getElementById("m-max-char");
-    if(!dc.innerHTML){dc.innerHTML=buildCharOpts("");document.getElementById("m-dom-veh").innerHTML=buildVehOpts("","");}
-    if(!mc.innerHTML){mc.innerHTML=buildCharOpts("");document.getElementById("m-max-veh").innerHTML=buildVehOpts("","");}
+    const players=mode==="2p"?["dom","max"]:["dom","max","fin"];
+    const colors={"dom":"var(--p1)","max":"var(--p2)","fin":"var(--p3)"};
+    const names={"dom":"Dom","max":"Max","fin":"Fin"};
+    const cols=mode==="2p"?"1fr 1fr":"1fr 1fr 1fr";
+    let inner=`<div class="manual-grid" style="grid-template-columns:${cols};">`;
+    players.forEach(who=>{
+      inner+=`<div><div class="manual-who" style="color:${colors[who]};font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">${names[who]}</div>
+        <select id="m-${who}-char" class="tsel" onchange="updateManualVehs('${who}')" style="margin-bottom:6px;">${buildCharOpts("")}</select>
+        <select id="m-${who}-veh" class="tsel">${buildVehOpts("","")}</select>
+      </div>`;
+    });
+    inner+=`</div>`;
+    document.getElementById("manual-inner").innerHTML=inner;
     form.style.display="block";btn.textContent="\u2715 Close";
   }
 }
@@ -495,45 +553,73 @@ function updateManualVehs(who){
   document.getElementById(`m-${who}-veh`).innerHTML=buildVehOpts(char?char.wc:null,"");
 }
 function applyManual(){
-  const dc=document.getElementById("m-dom-char").value;
-  const dv=document.getElementById("m-dom-veh").value;
-  const mc=document.getElementById("m-max-char").value;
-  const mv=document.getElementById("m-max-veh").value;
-  if(!dc||!dv||!mc||!mv){alert("Please select a character and vehicle for both players.");return;}
-  const domChar=ALL_CHARS.find(c=>c.n===dc);
-  const maxChar=ALL_CHARS.find(c=>c.n===mc);
-  curPairs={dom:{char:dc,wc:domChar.wc,veh:dv},max:{char:mc,wc:maxChar.wc,veh:mv}};
-  document.getElementById("gen-out").innerHTML=`
-    <div class="pair-display">
-      <div class="pair-card dom"><div class="pair-lbl">Dom</div><div class="pair-char">${dc}</div><div class="pair-veh">${dv}</div><div class="pair-wc">${domChar.wc}</div></div>
-      <div class="vs-lbl">VS</div>
-      <div class="pair-card max"><div class="pair-lbl">Max</div><div class="pair-char">${mc}</div><div class="pair-veh">${mv}</div><div class="pair-wc">${maxChar.wc}</div></div>
-    </div>`;
+  const players=mode==="2p"?["dom","max"]:["dom","max","fin"];
+  const pairs={};
+  for(const who of players){
+    const c=document.getElementById(`m-${who}-char`).value;
+    const v=document.getElementById(`m-${who}-veh`).value;
+    if(!c||!v){alert(`Please select a character and vehicle for all players.`);return;}
+    const char=ALL_CHARS.find(x=>x.n===c);
+    pairs[who]={char:c,wc:char.wc,veh:v};
+  }
+  curPairs=pairs;
+  renderPairsDisplay(pairs);
   document.getElementById("add-row").style.display="flex";
   document.getElementById("manual-form").style.display="none";
   document.getElementById("manual-toggle-btn").textContent="\u270f\ufe0f Manual";
 }
 
+/* ═══ GENERATOR ═══ */
+function renderPairsDisplay(pairs){
+  if(mode==="2p"){
+    document.getElementById("gen-out").innerHTML=`
+      <div class="pair-display">
+        <div class="pair-card dom"><div class="pair-lbl">Dom</div><div class="pair-char">${pairs.dom.char}</div><div class="pair-veh">${pairs.dom.veh}</div><div class="pair-wc">${pairs.dom.wc}</div></div>
+        <div class="vs-lbl">VS</div>
+        <div class="pair-card max"><div class="pair-lbl">Max</div><div class="pair-char">${pairs.max.char}</div><div class="pair-veh">${pairs.max.veh}</div><div class="pair-wc">${pairs.max.wc}</div></div>
+      </div>`;
+  } else {
+    document.getElementById("gen-out").innerHTML=`
+      <div class="pairs-3p">
+        <div class="pair-card dom"><div class="pair-lbl">Dom</div><div class="pair-char">${pairs.dom.char}</div><div class="pair-veh">${pairs.dom.veh}</div><div class="pair-wc">${pairs.dom.wc}</div></div>
+        <div class="pair-card max"><div class="pair-lbl">Max</div><div class="pair-char">${pairs.max.char}</div><div class="pair-veh">${pairs.max.veh}</div><div class="pair-wc">${pairs.max.wc}</div></div>
+        <div class="pair-card fin"><div class="pair-lbl">Fin</div><div class="pair-char">${pairs.fin.char}</div><div class="pair-veh">${pairs.fin.veh}</div><div class="pair-wc">${pairs.fin.wc}</div></div>
+      </div>`;
+  }
+}
+
+/* ═══ GENERATOR ═══ */
 function generatePairs(){
   const chars=[...ALL_CHARS];
-  const c1=chars.splice(Math.floor(Math.random()*chars.length),1)[0],c2=rnd(chars);
+  const c1=chars.splice(Math.floor(Math.random()*chars.length),1)[0];
+  const rest=[...chars];
+  const c2=rest.splice(Math.floor(Math.random()*rest.length),1)[0];
   const v1=rnd(VEHS[c1.wc]),v2=rnd(VEHS[c2.wc]);
-  curPairs={dom:{char:c1.n,wc:c1.wc,veh:v1},max:{char:c2.n,wc:c2.wc,veh:v2}};
-  document.getElementById("gen-out").innerHTML=`
-    <div class="pair-display">
-      <div class="pair-card dom"><div class="pair-lbl">Dom</div><div class="pair-char">${c1.n}</div><div class="pair-veh">${v1}</div><div class="pair-wc">${c1.wc}</div></div>
-      <div class="vs-lbl">VS</div>
-      <div class="pair-card max"><div class="pair-lbl">Max</div><div class="pair-char">${c2.n}</div><div class="pair-veh">${v2}</div><div class="pair-wc">${c2.wc}</div></div>
-    </div>`;
+  if(mode==="2p"){
+    curPairs={dom:{char:c1.n,wc:c1.wc,veh:v1},max:{char:c2.n,wc:c2.wc,veh:v2}};
+  } else {
+    const c3=rnd(rest);
+    const v3=rnd(VEHS[c3.wc]);
+    curPairs={dom:{char:c1.n,wc:c1.wc,veh:v1},max:{char:c2.n,wc:c2.wc,veh:v2},fin:{char:c3.n,wc:c3.wc,veh:v3}};
+  }
+  renderPairsDisplay(curPairs);
   document.getElementById("add-row").style.display="flex";
 }
 
 function startRound(){
   if(!curPairs)return;
-  if(draft&&!confirm("Discard the current unsubmitted round?"))return;
-  draft={id:Date.now(),dom:{...curPairs.dom},max:{...curPairs.max},
-    gp1:Array.from({length:8},()=>({track:"",domPos:0,maxPos:0})),
-    gp2:Array.from({length:8},()=>({track:"",domPos:0,maxPos:0}))};
+  if(mode==="2p"){
+    if(draft&&!confirm("Discard the current unsubmitted 2-player round?"))return;
+    draft={id:Date.now(),mode:"2p",dom:{...curPairs.dom},max:{...curPairs.max},
+      gp1:Array.from({length:8},()=>({track:"",domPos:0,maxPos:0})),
+      gp2:Array.from({length:8},()=>({track:"",domPos:0,maxPos:0}))};
+  } else {
+    if(draft3p&&!confirm("Discard the current unsubmitted 3-player round?"))return;
+    draft3p={id:Date.now(),mode:"3p",dom:{...curPairs.dom},max:{...curPairs.max},fin:{...curPairs.fin},
+      gp1:Array.from({length:5},()=>({track:"",domPos:0,maxPos:0,finPos:0})),
+      gp2:Array.from({length:5},()=>({track:"",domPos:0,maxPos:0,finPos:0})),
+      gp3:Array.from({length:5},()=>({track:"",domPos:0,maxPos:0,finPos:0}))};
+  }
   saveAll();curPairs=null;
   document.getElementById("gen-out").innerHTML="";
   document.getElementById("add-row").style.display="none";
@@ -542,13 +628,19 @@ function startRound(){
 
 /* ═══ SCORE UPDATES ═══ */
 function updateTrack(rid,val){
-  if(!draft)return;
-  const[,gp,i]=rid.split("-");draft[gp][+i].track=val;saveAll();checkSubmit();
+  const[px,gp,i]=rid.split("-");
+  const is3=px.charAt(0)==="t";
+  const d=is3?draft3p:draft;if(!d)return;
+  d[gp][+i].track=val;saveAll();checkSubmit(is3);
 }
 function updatePos(rid,who,val){
-  if(!draft)return;
-  const[,gp,i]=rid.split("-");draft[gp][+i][who+"Pos"]=parseInt(val)||0;
-  saveAll();refreshDraft();checkSubmit();
+  const[px,gp,i]=rid.split("-");
+  const is3=px.charAt(0)==="t";
+  const d=is3?draft3p:draft;if(!d)return;
+  d[gp][+i][who+"Pos"]=parseInt(val)||0;
+  saveAll();
+  if(is3)refreshDraft3p();else refreshDraft();
+  checkSubmit(is3);
 }
 function refreshDraft(){
   if(!draft)return;
@@ -575,18 +667,62 @@ function refreshDraft(){
     else ew.innerHTML=`<div class="win-badge draw">LEVEL</div>`;
   }
 }
-function checkSubmit(){
-  const btn=document.getElementById("submit-btn"),hint=document.getElementById("submit-hint");
-  if(!btn||!draft)return;
-  const ok=[...draft.gp1,...draft.gp2].every(r=>r.track&&r.domPos>0&&r.maxPos>0);
+function checkSubmit(is3){
+  const btnId=is3?"submit-btn-3p":"submit-btn-2p";
+  const hintId=is3?"submit-hint-3p":"submit-hint-2p";
+  const btn=document.getElementById(btnId),hint=document.getElementById(hintId);
+  if(!btn)return;
+  const d=is3?draft3p:draft;if(!d)return;
+  let ok;
+  if(is3)ok=[...d.gp1,...d.gp2,...d.gp3].every(r=>r.track&&r.domPos>0&&r.maxPos>0&&r.finPos>0);
+  else ok=[...d.gp1,...d.gp2].every(r=>r.track&&r.domPos>0&&r.maxPos>0);
   btn.disabled=!ok;
-  if(hint)hint.textContent=ok?"All races filled — ready to submit!":"Fill every track and both positions to unlock submit.";
+  if(hint)hint.textContent=ok?"All races filled — ready to submit!":"Fill every track and all positions to unlock submit.";
 }
-function submitRound(){
-  if(!draft||![...draft.gp1,...draft.gp2].every(r=>r.track&&r.domPos>0&&r.maxPos>0))return;
-  if(!confirm("Submit this round to the database? It will be locked."))return;
-  submitted.push({...draft,num:submitted.length+1,submittedAt:new Date().toISOString()});
-  draft=null;saveAll();renderRounds();updateSidebar();
+
+function refreshDraft3p(){
+  if(!draft3p)return;
+  const id=draft3p.id;
+  ["gp1","gp2","gp3"].forEach(gp=>{
+    ["dom","max","fin"].forEach(who=>{
+      let t=0;
+      draft3p[gp].forEach((race,i)=>{
+        const p=rPts(race,who);t+=p;
+        const e=document.getElementById(`pc-t${id}-${gp}-${who}-${i}`);
+        if(e){e.textContent=race[who+"Pos"]>0?p:"—";e.className="rscore-pts "+(race[who+"Pos"]>0?who:"dim");}
+      });
+      const te=document.getElementById(`gptv-t${id}-${gp}-${who}`);if(te)te.textContent=t;
+    });
+  });
+  const dt=["gp1","gp2","gp3"].reduce((s,g)=>s+gpTot(draft3p[g],"dom"),0);
+  const mt=["gp1","gp2","gp3"].reduce((s,g)=>s+gpTot(draft3p[g],"max"),0);
+  const ft=["gp1","gp2","gp3"].reduce((s,g)=>s+gpTot(draft3p[g],"fin"),0);
+  const e1=document.getElementById(`rtot-t${id}-dom`),e2=document.getElementById(`rtot-t${id}-max`),e3=document.getElementById(`rtot-t${id}-fin`);
+  const ew=document.getElementById(`win-t${id}`);
+  if(e1)e1.textContent=dt;if(e2)e2.textContent=mt;if(e3)e3.textContent=ft;
+  if(ew){
+    const mx=Math.max(dt,mt,ft);
+    if(dt===0&&mt===0&&ft===0)ew.innerHTML="";
+    else if(dt===mx&&dt>mt&&dt>ft)ew.innerHTML=`<div class="win-badge dom">🏆 DOM LEADS</div>`;
+    else if(mt===mx&&mt>dt&&mt>ft)ew.innerHTML=`<div class="win-badge max">🏆 MAX LEADS</div>`;
+    else if(ft===mx&&ft>dt&&ft>mt)ew.innerHTML=`<div class="win-badge fin">🏆 FIN LEADS</div>`;
+    else ew.innerHTML=`<div class="win-badge draw">LEVEL</div>`;
+  }
+}
+function submitRound(is3){
+  const d=is3?draft3p:draft;if(!d)return;
+  if(is3){
+    if(![...d.gp1,...d.gp2,...d.gp3].every(r=>r.track&&r.domPos>0&&r.maxPos>0&&r.finPos>0))return;
+    if(!confirm("Submit this 3-player round? It will be locked."))return;
+    submitted3p.push({...d,num:submitted3p.length+1,submittedAt:new Date().toISOString()});
+    draft3p=null;
+  } else {
+    if(![...d.gp1,...d.gp2].every(r=>r.track&&r.domPos>0&&r.maxPos>0))return;
+    if(!confirm("Submit this round? It will be locked."))return;
+    submitted.push({...d,num:submitted.length+1,submittedAt:new Date().toISOString()});
+    draft=null;
+  }
+  saveAll();renderRounds();updateSidebar();
 }
 
 /* ═══ ROUND RENDERING ═══ */
@@ -644,10 +780,10 @@ function makeRoundCard(round,isDraft){
     <div class="rh">
       <span class="rnum">${isDraft?"IN PROGRESS":"ROUND "+round.num}</span>
       ${badges}
-      ${isDraft?'<span id="draft-save-ind" style="font-size:11px;font-weight:700;color:var(--green);opacity:.35;transition:opacity .4s;">&#10003; Draft saved</span>':""}
+      ${isDraft?'<span id="draft-save-ind-2p" style="font-size:11px;font-weight:700;color:var(--green);opacity:.35;transition:opacity .4s;">&#10003; Draft saved</span>':""}
       ${!isDraft?'<span class="sub-badge">✓ Saved</span>':""}
       ${isDraft
-        ?`<button class="btn-del" onclick="discardDraft()" style="margin-left:auto;">✕ Discard</button>`
+        ?`<button class="btn-del" id="discard-btn-2p" onclick="confirmDiscard('2p')" style="margin-left:auto;">✕ Discard</button>`
         :`<button class="btn-del" onclick="deleteSubmitted(${id})" style="margin-left:auto;">✕ Delete</button>`}
     </div>
     <div class="round-pairs">
@@ -666,7 +802,7 @@ function makeRoundCard(round,isDraft){
       <div id="win-${px}${id}" style="margin-left:auto;">${wHTML}</div>
     </div>
     ${isDraft?`<div class="submit-row">
-      <button class="btn btn-submit" id="submit-btn" onclick="submitRound()" disabled>⬆ Submit Round to Database</button>
+      <button class="btn btn-submit" id="submit-btn" onclick="submitRound(false)" disabled>⬆ Submit Round to Database</button>
       <div class="submit-hint" id="submit-hint">Fill every track and both positions to unlock submit.</div>
     </div>`:""}
   </div>`;
@@ -679,28 +815,155 @@ function toggleRaces(id,px){
   btn.textContent=(open?"▲":"▼")+" "+(open?"Hide":"Show")+" all races";
 }
 
+/* ═══ 3P ROUND RENDERING ═══ */
+function makeGP3p(round,gp,isDraft){
+  const id=round.id;
+  const GPs=["gp1","gp2","gp3"];
+  const idx=GPs.indexOf(gp);
+  const chars=[round.dom,round.max,round.fin];
+  const domC=chars[idx%3],maxC=chars[(idx+1)%3],finC=chars[(idx+2)%3];
+  let rows="";
+  round[gp].forEach((race,i)=>{
+    const rid=`t${id}-${gp}-${i}`;
+    const dp=race.domPos,mp=race.maxPos,fp=race.finPos;
+    const trkCell=isDraft?trackSelect(race.track,rid):`<span style="font-size:13px;font-weight:700;">${race.track||"—"}</span>`;
+    const dSel=isDraft?posSelect(dp,rid,"dom"):`<span style="font-size:12px;color:var(--muted);">${dp>0?ord(dp):"—"}</span>`;
+    const mSel=isDraft?posSelect(mp,rid,"max"):`<span style="font-size:12px;color:var(--muted);">${mp>0?ord(mp):"—"}</span>`;
+    const fSel=isDraft?posSelect(fp,rid,"fin"):`<span style="font-size:12px;color:var(--muted);">${fp>0?ord(fp):"—"}</span>`;
+    rows+=`<div class="race-row">
+      <div class="race-top"><span class="rn">R${i+1}</span><div class="rtrack">${trkCell}</div></div>
+      <div class="race-bottom-3p">
+        <div class="rscore"><span class="rscore-who dom">Dom</span>${dSel}<span class="rscore-pts ${dp>0?"dom":"dim"}" id="pc-t${id}-${gp}-dom-${i}">${dp>0?pts(dp):"—"}</span></div>
+        <div class="rscore"><span class="rscore-who max">Max</span>${mSel}<span class="rscore-pts ${mp>0?"max":"dim"}" id="pc-t${id}-${gp}-max-${i}">${mp>0?pts(mp):"—"}</span></div>
+        <div class="rscore"><span class="rscore-who fin">Fin</span>${fSel}<span class="rscore-pts ${fp>0?"fin":"dim"}" id="pc-t${id}-${gp}-fin-${i}">${fp>0?pts(fp):"—"}</span></div>
+      </div>
+    </div>`;
+  });
+  const gtd=gpTot(round[gp],"dom"),gtm=gpTot(round[gp],"max"),gtf=gpTot(round[gp],"fin");
+  return`<div class="gp-sec">
+    <div class="gp-hdr"><span class="gp-title">GP ${idx+1}</span><span style="font-size:11px;color:var(--muted);">rotation ${idx+1}</span></div>
+    <div class="char-tags">
+      <span class="ctag dom">Dom — ${domC.char} / ${domC.veh}</span>
+      <span class="ctag max">Max — ${maxC.char} / ${maxC.veh}</span>
+      <span class="ctag fin">Fin — ${finC.char} / ${finC.veh}</span>
+    </div>
+    <div class="gp-races">${rows}</div>
+    <div class="gp-footer">
+      <span class="gpf-lbl">GP total</span>
+      <span class="gptv dom" id="gptv-t${id}-${gp}-dom">${gtd}</span>
+      <span style="font-size:11px;color:var(--muted);">·</span>
+      <span class="gptv max" id="gptv-t${id}-${gp}-max">${gtm}</span>
+      <span style="font-size:11px;color:var(--muted);">·</span>
+      <span class="gptv fin" id="gptv-t${id}-${gp}-fin">${gtf}</span>
+    </div>
+  </div>`;
+}
+
+function makeRoundCard3p(round,isDraft){
+  const id=round.id,px="t";
+  const dt=["gp1","gp2","gp3"].reduce((s,g)=>s+gpTot(round[g],"dom"),0);
+  const mt=["gp1","gp2","gp3"].reduce((s,g)=>s+gpTot(round[g],"max"),0);
+  const ft=["gp1","gp2","gp3"].reduce((s,g)=>s+gpTot(round[g],"fin"),0);
+  const any=dt>0||mt>0||ft>0;
+  const mx=Math.max(dt,mt,ft);
+  let wHTML="";
+  if(any){
+    if(dt===mx&&dt>mt&&dt>ft)wHTML=`<div class="win-badge dom">🏆 DOM WINS</div>`;
+    else if(mt===mx&&mt>dt&&mt>ft)wHTML=`<div class="win-badge max">🏆 MAX WINS</div>`;
+    else if(ft===mx&&ft>dt&&ft>mt)wHTML=`<div class="win-badge fin">🏆 FIN WINS</div>`;
+    else wHTML=`<div class="win-badge draw">DRAW</div>`;
+  }
+  const racesId=`races-t${id}`;
+  return`<div id="rc-t${id}" class="round-card${isDraft?" is-draft":""}">
+    <div class="rh">
+      <span class="rnum" style="color:var(--p3);">${isDraft?"3P IN PROGRESS":"3P ROUND "+round.num}</span>
+      <span class="wc-badge" style="background:rgba(187,119,255,.08);border:1px solid rgba(187,119,255,.25);color:var(--p3);">3 Player</span>
+      ${isDraft?'<span id="draft-save-ind-3p" style="font-size:11px;font-weight:700;color:var(--green);opacity:.35;transition:opacity .4s;">&#10003; Draft saved</span>':""}
+      ${!isDraft?'<span class="sub-badge">✓ Saved</span>':""}
+      ${isDraft
+        ?`<button class="btn-del" id="discard-btn-3p" onclick="confirmDiscard('3p')" style="margin-left:auto;">✕ Discard</button>`
+        :`<button class="btn-del" onclick="deleteSubmitted3p(${id})" style="margin-left:auto;">✕ Delete</button>`}
+    </div>
+    <div class="pairs-3p" style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);">
+      <div class="rp-card dom"><div class="rp-who">Dom</div><div class="rp-char">${round.dom.char}</div><div class="rp-veh">${round.dom.veh}</div><div class="rp-wc">${round.dom.wc}</div></div>
+      <div class="rp-card max"><div class="rp-who">Max</div><div class="rp-char">${round.max.char}</div><div class="rp-veh">${round.max.veh}</div><div class="rp-wc">${round.max.wc}</div></div>
+      <div class="rp-card fin"><div class="rp-who">Fin</div><div class="rp-char">${round.fin.char}</div><div class="rp-veh">${round.fin.veh}</div><div class="rp-wc">${round.fin.wc}</div></div>
+    </div>
+    ${isDraft
+      ?`${makeGP3p(round,"gp1",true)}<div class="divider"></div>${makeGP3p(round,"gp2",true)}<div class="divider"></div>${makeGP3p(round,"gp3",true)}`
+      :`<button class="btn-toggle" id="toggle-t${id}" onclick="toggleRaces('${id}','t')">▼ Show all races</button>
+        <div id="${racesId}" style="display:none;margin-top:.875rem;">${makeGP3p(round,"gp1",false)}<div class="divider"></div>${makeGP3p(round,"gp2",false)}<div class="divider"></div>${makeGP3p(round,"gp3",false)}</div>`}
+    <div class="rt">
+      <span class="rt-lbl">ROUND<br>TOTAL</span>
+      <span class="rt-score dom">Dom: <strong id="rtot-t${id}-dom">${dt}</strong></span>
+      <span class="rt-score max">Max: <strong id="rtot-t${id}-max">${mt}</strong></span>
+      <span class="rt-score fin">Fin: <strong id="rtot-t${id}-fin">${ft}</strong></span>
+      <div id="win-t${id}" style="margin-left:auto;">${wHTML}</div>
+    </div>
+    ${isDraft?`<div class="submit-row">
+      <button class="btn btn-submit" id="submit-btn-3p" onclick="submitRound(true)" disabled style="width:100%;">⬆ Submit 3P Round to Database</button>
+      <div class="submit-hint" id="submit-hint-3p">Fill every track and all positions to unlock submit.</div>
+    </div>`:""}
+  </div>`;
+}
+
 function renderRounds(){
   const c=document.getElementById("rounds-container");
   const parts=[];
   if(draft)parts.push(makeRoundCard(draft,true));
-  [...submitted].reverse().forEach(r=>parts.push(makeRoundCard(r,false)));
+  if(draft3p)parts.push(makeRoundCard3p(draft3p,true));
+  // merge and sort by id desc
+  const allSub=[...submitted.map(r=>({r,is3:false})),...submitted3p.map(r=>({r,is3:true}))];
+  allSub.sort((a,b)=>b.r.id-a.r.id);
+  allSub.forEach(({r,is3})=>parts.push(is3?makeRoundCard3p(r,false):makeRoundCard(r,false)));
   c.innerHTML=parts.length?parts.join(""):'<div class="empty">Randomise some pairs above to start your first round 🏎️</div>';
-  if(draft)checkSubmit();
+  if(draft||draft3p)checkSubmit();
   updateSidebar();
 }
 
+function confirmDiscard(mode3p){
+  const btnId=mode3p==="3p"?"discard-btn-3p":"discard-btn-2p";
+  const btn=document.getElementById(btnId);
+  if(!btn)return;
+  if(btn.dataset.confirming==="1"){
+    if(mode3p==="3p")discard3p();else discardDraft();
+  } else {
+    btn.dataset.confirming="1";
+    btn.textContent="Sure? Tap again";
+    btn.style.color="var(--p1)";
+    setTimeout(()=>{
+      if(btn.dataset.confirming==="1"){
+        btn.dataset.confirming="";
+        btn.textContent="✕ Discard";
+        btn.style.color="";
+      }
+    },3000);
+  }
+}
 function discardDraft(){
-  if(!confirm("Discard this round and all its scores?"))return;
   draft=null;saveAll();renderRounds();
+}
+function discard3p(){
+  draft3p=null;saveAll();renderRounds();
 }
 function deleteSubmitted(id){
   if(!confirm("Permanently delete this round from the database?"))return;
   submitted=submitted.filter(r=>r.id!==id);submitted.forEach((r,i)=>r.num=i+1);
   saveAll();renderRounds();
 }
+function deleteSubmitted3p(id){
+  if(!confirm("Permanently delete this 3-player round?"))return;
+  submitted3p=submitted3p.filter(r=>r.id!==id);submitted3p.forEach((r,i)=>r.num=i+1);
+  saveAll();renderRounds();
+}
 function deleteFromStats(id){
   if(!confirm("Remove this round from the database?"))return;
   submitted=submitted.filter(r=>r.id!==id);submitted.forEach((r,i)=>r.num=i+1);
+  saveAll();renderRounds();renderStats();
+}
+function deleteFromStats3p(id){
+  if(!confirm("Remove this 3-player round from the database?"))return;
+  submitted3p=submitted3p.filter(r=>r.id!==id);submitted3p.forEach((r,i)=>r.num=i+1);
   saveAll();renderRounds();renderStats();
 }
 function updateSidebar(){
@@ -710,26 +973,49 @@ function updateSidebar(){
     const d=gpTot(r.gp1,"dom")+gpTot(r.gp2,"dom"),m=gpTot(r.gp1,"max")+gpTot(r.gp2,"max");
     if(d>m)dw++;else if(m>d)mw++;else dr++;
   });
-  el.innerHTML=`<div class="sb-stat">Submitted: <strong>${submitted.length}</strong></div>
+  let dw3=0,mw3=0,fw3=0;
+  submitted3p.forEach(r=>{
+    const d=["gp1","gp2","gp3"].reduce((s,g)=>s+gpTot(r[g],"dom"),0);
+    const m=["gp1","gp2","gp3"].reduce((s,g)=>s+gpTot(r[g],"max"),0);
+    const f=["gp1","gp2","gp3"].reduce((s,g)=>s+gpTot(r[g],"fin"),0);
+    const mx=Math.max(d,m,f);
+    if(d===mx&&d>m&&d>f)dw3++;else if(m===mx&&m>d&&m>f)mw3++;else if(f===mx&&f>d&&f>m)fw3++;
+  });
+  el.innerHTML=`<div class="sb-stat" style="color:var(--muted);font-weight:700;font-size:10px;">2P (${submitted.length})</div>
     <div class="sb-stat" style="color:var(--p1);">Dom: <strong>${dw}W</strong></div>
     <div class="sb-stat" style="color:var(--p2);">Max: <strong>${mw}W</strong></div>
-    ${dr?`<div class="sb-stat">Draws: <strong>${dr}</strong></div>`:""}`;
+    ${submitted3p.length?`<div class="sb-stat" style="color:var(--muted);font-weight:700;font-size:10px;margin-top:6px;">3P (${submitted3p.length})</div>
+    <div class="sb-stat" style="color:var(--p1);">Dom: <strong>${dw3}W</strong></div>
+    <div class="sb-stat" style="color:var(--p2);">Max: <strong>${mw3}W</strong></div>
+    <div class="sb-stat" style="color:var(--p3);">Fin: <strong>${fw3}W</strong></div>`:""}`;
 }
 
 /* ═══ STATS PAGE ═══ */
+let statsMode="2p";
+function setStatsMode(m){
+  statsMode=m;
+  document.getElementById("smb-2p").classList.toggle("active",m==="2p");
+  document.getElementById("smb-3p").classList.toggle("active",m==="3p");
+  renderStats();
+}
 function renderStats(){
   const el=document.getElementById("stats-content");
-  if(!submitted.length){el.innerHTML='<div class="empty">No submitted rounds yet 📊</div>';return;}
+  // Mode toggle header
+  const toggleHtml=`<div class="stats-mode-toggle">
+    <button class="mode-btn${statsMode==="2p"?" active":""}" id="smb-2p" onclick="setStatsMode('2p')">2 Player Stats</button>
+    <button class="mode-btn${statsMode==="3p"?" active":""}" id="smb-3p" onclick="setStatsMode('3p')">3 Player Stats</button>
+  </div>`;
+  if(statsMode==="3p"){renderStats3p(el,toggleHtml);return;}
+  // ── 2-PLAYER STATS ──
+  if(!submitted.length){el.innerHTML=toggleHtml+'<div class="empty">No submitted 2-player rounds yet 📊</div>';return;}
   let dW=0,mW=0,draws=0;
   const wcP={small:{dom:[],max:[]},medium:{dom:[],max:[]},large:{dom:[],max:[]}};
   const typeP={kart:{dom:[],max:[]},bike:{dom:[],max:[]}};
   const vehP={},trackRec={},trackPts={};
   let domRaces=[],maxRaces=[],domGPs=[],maxGPs=[];
-
   submitted.forEach(r=>{
     const d=gpTot(r.gp1,"dom")+gpTot(r.gp2,"dom"),m=gpTot(r.gp1,"max")+gpTot(r.gp2,"max");
     if(d>m)dW++;else if(m>d)mW++;else draws++;
-    // Collect per-GP scores
     domGPs.push(gpTot(r.gp1,"dom"),gpTot(r.gp2,"dom"));
     maxGPs.push(gpTot(r.gp1,"max"),gpTot(r.gp2,"max"));
     function acc(race,dv,mv,dw,mw){
@@ -751,27 +1037,19 @@ function renderStats(){
     r.gp1.forEach(race=>acc(race,r.dom.veh,r.max.veh,r.dom.wc,r.max.wc));
     r.gp2.forEach(race=>acc(race,r.max.veh,r.dom.veh,r.max.wc,r.dom.wc));
   });
-
   const domTotalPts=domRaces.reduce((s,r)=>s+r.pts,0);
   const maxTotalPts=maxRaces.reduce((s,r)=>s+r.pts,0);
-
   const total=dW+mW+draws,maxW=Math.max(dW,mW)||1;
-
-  // Best 8-race GP per player
   let dBestGP={pts:-1},mBestGP={pts:-1};
   submitted.forEach(r=>{
-    // GP1: dom plays dom char/veh, max plays max char/veh
     const dg1=gpTot(r.gp1,"dom"),mg1=gpTot(r.gp1,"max");
     if(dg1>dBestGP.pts)dBestGP={pts:dg1,char:r.dom.char,veh:r.dom.veh,round:r.num,gp:1};
     if(mg1>mBestGP.pts)mBestGP={pts:mg1,char:r.max.char,veh:r.max.veh,round:r.num,gp:1};
-    // GP2: dom plays max char/veh (switched), max plays dom char/veh
     const dg2=gpTot(r.gp2,"dom"),mg2=gpTot(r.gp2,"max");
     if(dg2>dBestGP.pts)dBestGP={pts:dg2,char:r.max.char,veh:r.max.veh,round:r.num,gp:2};
     if(mg2>mBestGP.pts)mBestGP={pts:mg2,char:r.dom.char,veh:r.dom.veh,round:r.num,gp:2};
   });
-
   const domAvgGP=avg(domGPs),maxAvgGP=avg(maxGPs);
-
   function wcTable(){return["small","medium","large"].map(wc=>{
     const da=avg(wcP[wc].dom),ma=avg(wcP[wc].max),w=da!==null&&ma!==null?(da>ma?"dom":ma>da?"max":"tie"):"";
     return`<tr><td style="text-transform:capitalize;">${wc}</td><td class="dom-val">${fa(da)} <span style="font-size:10px;color:var(--muted);">(${wcP[wc].dom.length})</span></td><td class="max-val">${fa(ma)} <span style="font-size:10px;color:var(--muted);">(${wcP[wc].max.length})</span></td><td>${w?`<span class="pw ${w}">${w==="tie"?"Tie":w==="dom"?"Dom":"Max"}</span>`:""}</td></tr>`;
@@ -786,10 +1064,8 @@ function renderStats(){
     return`<table class="pt"><thead><tr><th>Vehicle</th><th>Avg</th><th>Races</th></tr></thead><tbody>`+
       vehs.map(([v,data])=>`<tr><td>${v}</td><td class="${who}-val">${fa(avg(data[who]))}</td><td style="color:var(--muted);">${data[who].length}</td></tr>`).join("")+`</tbody></table>`;
   }
-
-  // Build track stats rows for every track in order
   const allTracksList=TRACKS.flatMap(g=>g.tracks);
-    const trackRows=allTracksList.map(track=>{
+  const trackRows=allTracksList.map(track=>{
     const rec=trackRec[track]||{dom:0,max:0};
     const tp=trackPts[track]||{dom:[],max:[]};
     const da=avg(tp.dom),ma=avg(tp.max);
@@ -803,25 +1079,15 @@ function renderStats(){
       <td style="padding:4px 5px;">${lead?`<span class="pw ${lead}">${lead==="dom"?"Dom":"Max"}</span>`:`<span style="color:var(--muted);font-size:11px;">—</span>`}</td>
     </tr>`;
   }).join("");
-
   const mgmtRows=[...submitted].reverse().map(r=>{
     const d=gpTot(r.gp1,"dom")+gpTot(r.gp2,"dom"),m=gpTot(r.gp1,"max")+gpTot(r.gp2,"max");
     const rc=d>m?"dom":m>d?"max":"";
     const rt=d>m?`Dom wins (${d}–${m})`:m>d?`Max wins (${m}–${d})`:`Draw (${d}–${m})`;
-    return`<div class="mgmt-row">
-      <span class="mgmt-num">RND ${r.num}</span>
-      <div class="mgmt-info">
-        <div class="mgmt-chars"><span style="color:var(--p1);">${r.dom.char}</span> vs <span style="color:var(--p2);">${r.max.char}</span></div>
-        <div class="mgmt-result ${rc}">${rt}</div>
-      </div>
-      <button class="btn-del" onclick="deleteFromStats(${r.id})">✕ Remove</button>
-    </div>`;
+    return`<div class="mgmt-row"><span class="mgmt-num">RND ${r.num}</span><div class="mgmt-info"><div class="mgmt-chars"><span style="color:var(--p1);">${r.dom.char}</span> vs <span style="color:var(--p2);">${r.max.char}</span></div><div class="mgmt-result ${rc}">${rt}</div></div><button class="btn-del" onclick="deleteFromStats(${r.id})">✕ Remove</button></div>`;
   }).join("");
 
-  el.innerHTML=`<div class="stats-grid">
-
+  el.innerHTML=toggleHtml+`<div class="stats-grid">
     <div class="sc full"><div class="sc-title">MANAGE ROUNDS</div>${mgmtRows}</div>
-
     <div class="sc full">
       <div class="sc-title">OVERALL RECORD — ${total} round${total!==1?"s":""}</div>
       <div class="record-row"><span class="rec-name dom">Dom</span><div class="rec-bar-wrap"><div class="rec-bar dom" style="width:${Math.round(dW/maxW*100)}%"></div></div><span class="rec-val dom">${dW}</span></div>
@@ -833,28 +1099,15 @@ function renderStats(){
         <span style="font-size:14px;font-weight:900;color:var(--p2);">${maxTotalPts}</span>
       </div>
     </div>
-
     <div class="sc">
       <div class="sc-title">BEST 8-RACE GP</div>
       <div class="best-item"><div class="best-who dom">Dom</div>${dBestGP.pts>=0?`<div class="best-main">${dBestGP.pts} pts</div><div class="best-detail">Round ${dBestGP.round}, GP ${dBestGP.gp}<br>${dBestGP.char} / ${dBestGP.veh}</div>`:`<div class="no-data">No data yet</div>`}${domAvgGP!==null?`<div style="font-size:12px;color:var(--muted);margin-top:5px;">Avg GP: <strong style="color:var(--p1);">${fa(domAvgGP)}</strong> pts</div>`:""}</div>
       <div class="best-item"><div class="best-who max">Max</div>${mBestGP.pts>=0?`<div class="best-main">${mBestGP.pts} pts</div><div class="best-detail">Round ${mBestGP.round}, GP ${mBestGP.gp}<br>${mBestGP.char} / ${mBestGP.veh}</div>`:`<div class="no-data">No data yet</div>`}${maxAvgGP!==null?`<div style="font-size:12px;color:var(--muted);margin-top:5px;">Avg GP: <strong style="color:var(--p2);">${fa(maxAvgGP)}</strong> pts</div>`:""}</div>
     </div>
-
-    <div class="sc">
-      <div class="sc-title">KART vs BIKE</div>
-      <div class="sc-sub">Avg race pts by vehicle type</div>
-      <table class="pt"><thead><tr><th>Type</th><th style="color:var(--p1);">Dom</th><th style="color:var(--p2);">Max</th><th>Edge</th></tr></thead><tbody>${typeTable()}</tbody></table>
-    </div>
-
-    <div class="sc full">
-      <div class="sc-title">AVG PTS BY WEIGHT CLASS</div>
-      <div class="sc-sub">Average race points per character class played</div>
-      <table class="pt"><thead><tr><th>Class</th><th style="color:var(--p1);">Dom</th><th style="color:var(--p2);">Max</th><th>Edge</th></tr></thead><tbody>${wcTable()}</tbody></table>
-    </div>
-
+    <div class="sc"><div class="sc-title">KART vs BIKE</div><div class="sc-sub">Avg race pts by vehicle type</div><table class="pt"><thead><tr><th>Type</th><th style="color:var(--p1);">Dom</th><th style="color:var(--p2);">Max</th><th>Edge</th></tr></thead><tbody>${typeTable()}</tbody></table></div>
+    <div class="sc full"><div class="sc-title">AVG PTS BY WEIGHT CLASS</div><div class="sc-sub">Average race points per character class played</div><table class="pt"><thead><tr><th>Class</th><th style="color:var(--p1);">Dom</th><th style="color:var(--p2);">Max</th><th>Edge</th></tr></thead><tbody>${wcTable()}</tbody></table></div>
     <div class="sc"><div class="sc-title">DOM'S TOP VEHICLES</div><div class="sc-sub">Avg pts, min. 2 races</div>${vehTable("dom")}</div>
     <div class="sc"><div class="sc-title">MAX'S TOP VEHICLES</div><div class="sc-sub">Avg pts, min. 2 races</div>${vehTable("max")}</div>
-
     <div class="sc full">
       <div class="sc-title">TRACK STATS</div>
       <div style="overflow-x:auto;">
@@ -877,7 +1130,132 @@ function renderStats(){
         </table>
       </div>
     </div>
+  </div>`;
+}
 
+/* ═══ 3P STATS ═══ */
+function renderStats3p(el,toggleHtml){
+  if(!submitted3p.length){el.innerHTML=toggleHtml+'<div class="empty">No submitted 3-player rounds yet 📊</div>';return;}
+  let dW=0,mW=0,fW=0,draws=0;
+  const wcP={small:{dom:[],max:[],fin:[]},medium:{dom:[],max:[],fin:[]},large:{dom:[],max:[],fin:[]}};
+  const typeP={kart:{dom:[],max:[],fin:[]},bike:{dom:[],max:[],fin:[]}};
+  const vehP={},trackRec={};
+  let domGPs=[],maxGPs=[],finGPs=[];
+  let dBestGP={pts:-1},mBestGP={pts:-1},fBestGP={pts:-1};
+  let domTotal=0,maxTotal=0,finTotal=0;
+
+  submitted3p.forEach(r=>{
+    const GPs=["gp1","gp2","gp3"];
+    const d=GPs.reduce((s,g)=>s+gpTot(r[g],"dom"),0);
+    const m=GPs.reduce((s,g)=>s+gpTot(r[g],"max"),0);
+    const f=GPs.reduce((s,g)=>s+gpTot(r[g],"fin"),0);
+    domTotal+=d;maxTotal+=m;finTotal+=f;
+    const mx=Math.max(d,m,f);
+    if(d===mx&&d>m&&d>f)dW++;else if(m===mx&&m>d&&m>f)mW++;else if(f===mx&&f>d&&f>m)fW++;else draws++;
+    GPs.forEach((gp,gi)=>{
+      const chars=[r.dom,r.max,r.fin];
+      const domC=chars[gi%3],maxC=chars[(gi+1)%3],finC=chars[(gi+2)%3];
+      const gt_d=gpTot(r[gp],"dom"),gt_m=gpTot(r[gp],"max"),gt_f=gpTot(r[gp],"fin");
+      domGPs.push(gt_d);maxGPs.push(gt_m);finGPs.push(gt_f);
+      if(gt_d>dBestGP.pts)dBestGP={pts:gt_d,char:domC.char,veh:domC.veh,round:r.num,gp:gi+1};
+      if(gt_m>mBestGP.pts)mBestGP={pts:gt_m,char:maxC.char,veh:maxC.veh,round:r.num,gp:gi+1};
+      if(gt_f>fBestGP.pts)fBestGP={pts:gt_f,char:finC.char,veh:finC.veh,round:r.num,gp:gi+1};
+      r[gp].forEach(race=>{
+        const dp=pts(race.domPos),mp=pts(race.maxPos),fp=pts(race.finPos);
+        wcP[domC.wc].dom.push(dp);wcP[maxC.wc].max.push(mp);wcP[finC.wc].fin.push(fp);
+        const dtk=BIKE_SET.has(domC.veh)?"bike":"kart",mtk=BIKE_SET.has(maxC.veh)?"bike":"kart",ftk=BIKE_SET.has(finC.veh)?"bike":"kart";
+        typeP[dtk].dom.push(dp);typeP[mtk].max.push(mp);typeP[ftk].fin.push(fp);
+        if(!vehP[domC.veh])vehP[domC.veh]={dom:[],max:[],fin:[]};
+        if(!vehP[maxC.veh])vehP[maxC.veh]={dom:[],max:[],fin:[]};
+        if(!vehP[finC.veh])vehP[finC.veh]={dom:[],max:[],fin:[]};
+        vehP[domC.veh].dom.push(dp);vehP[maxC.veh].max.push(mp);vehP[finC.veh].fin.push(fp);
+        if(race.track){
+          if(!trackRec[race.track])trackRec[race.track]={dom:0,max:0,fin:0};
+          const mx2=Math.max(dp,mp,fp);
+          if(dp===mx2&&dp>mp&&dp>fp)trackRec[race.track].dom++;
+          else if(mp===mx2&&mp>dp&&mp>fp)trackRec[race.track].max++;
+          else if(fp===mx2&&fp>dp&&fp>mp)trackRec[race.track].fin++;
+        }
+      });
+    });
+  });
+
+  const total=submitted3p.length,maxWin=Math.max(dW,mW,fW)||1;
+  const domAvgGP=avg(domGPs),maxAvgGP=avg(maxGPs),finAvgGP=avg(finGPs);
+
+  function gpBestCard(b,who,colorVar,avgV){
+    return`<div class="best-item"><div class="best-who ${who}">${who[0].toUpperCase()+who.slice(1)}</div>${b.pts>=0?`<div class="best-main">${b.pts} pts</div><div class="best-detail">Round ${b.round}, GP ${b.gp}<br>${b.char} / ${b.veh}</div>`:`<div class="no-data">No data yet</div>`}${avgV!==null?`<div style="font-size:12px;color:var(--muted);margin-top:5px;">Avg GP: <strong style="color:${colorVar};">${fa(avgV)}</strong> pts</div>`:""}</div>`;
+  }
+
+  const allTracksList=TRACKS.flatMap(g=>g.tracks);
+  const trackRows3p=allTracksList.map(track=>{
+    const rec=trackRec[track]||{dom:0,max:0,fin:0};
+    const lead=rec.dom>rec.max&&rec.dom>rec.fin?"dom":rec.max>rec.dom&&rec.max>rec.fin?"max":rec.fin>rec.dom&&rec.fin>rec.max?"fin":"";
+    return`<tr>
+      <td style="padding:4px 5px;font-size:11px;">${track}</td>
+      <td class="dom-val" style="text-align:center;padding:4px 3px;font-size:12px;">${rec.dom}</td>
+      <td class="max-val" style="text-align:center;padding:4px 3px;font-size:12px;">${rec.max}</td>
+      <td class="fin-val" style="text-align:center;padding:4px 3px;font-size:12px;">${rec.fin}</td>
+      <td style="padding:4px 5px;">${lead?`<span class="pw ${lead}">${lead==="dom"?"Dom":lead==="max"?"Max":"Fin"}</span>`:`<span style="color:var(--muted);font-size:11px;">—</span>`}</td>
+    </tr>`;
+  }).join("");
+
+  function vehTable3p(who,colorCls){
+    const vehs=Object.entries(vehP).filter(([,v])=>v[who].length>=2).sort((a,b)=>avg(b[1][who])-avg(a[1][who])).slice(0,5);
+    if(!vehs.length)return`<div class="no-data">Need ≥2 races per vehicle</div>`;
+    return`<table class="pt"><thead><tr><th>Vehicle</th><th>Avg</th><th>Races</th></tr></thead><tbody>`+
+      vehs.map(([v,data])=>`<tr><td>${v}</td><td class="${colorCls}-val">${fa(avg(data[who]))}</td><td style="color:var(--muted);">${data[who].length}</td></tr>`).join("")+`</tbody></table>`;
+  }
+
+  const mgmtRows=[...submitted3p].reverse().map(r=>{
+    const d=["gp1","gp2","gp3"].reduce((s,g)=>s+gpTot(r[g],"dom"),0);
+    const m=["gp1","gp2","gp3"].reduce((s,g)=>s+gpTot(r[g],"max"),0);
+    const f=["gp1","gp2","gp3"].reduce((s,g)=>s+gpTot(r[g],"fin"),0);
+    const mx=Math.max(d,m,f);
+    const rc=d===mx&&d>m&&d>f?"dom":m===mx&&m>d&&m>f?"max":f===mx&&f>d&&f>m?"fin":"";
+    const rt=rc==="dom"?`Dom wins (${d})`:rc==="max"?`Max wins (${m})`:rc==="fin"?`Fin wins (${f})`:`Draw`;
+    return`<div class="mgmt-row"><span class="mgmt-num">RND ${r.num}</span><div class="mgmt-info"><div class="mgmt-chars"><span style="color:var(--p1);">${r.dom.char}</span> · <span style="color:var(--p2);">${r.max.char}</span> · <span style="color:var(--p3);">${r.fin.char}</span></div><div class="mgmt-result ${rc}">${rt}</div></div><button class="btn-del" onclick="deleteFromStats3p(${r.id})">✕ Remove</button></div>`;
+  }).join("");
+
+  el.innerHTML=toggleHtml+`<div class="stats-grid">
+    <div class="sc full"><div class="sc-title">MANAGE 3P ROUNDS</div>${mgmtRows}</div>
+    <div class="sc full">
+      <div class="sc-title">OVERALL RECORD — ${total} round${total!==1?"s":""}</div>
+      <div class="record-row"><span class="rec-name dom">Dom</span><div class="rec-bar-wrap"><div class="rec-bar dom" style="width:${Math.round(dW/maxWin*100)}%"></div></div><span class="rec-val dom">${dW}</span></div>
+      <div class="record-row"><span class="rec-name max">Max</span><div class="rec-bar-wrap"><div class="rec-bar max" style="width:${Math.round(mW/maxWin*100)}%"></div></div><span class="rec-val max">${mW}</span></div>
+      <div class="record-row"><span class="rec-name fin">Fin</span><div class="rec-bar-wrap"><div class="rec-bar fin" style="width:${Math.round(fW/maxWin*100)}%"></div></div><span class="rec-val fin">${fW}</span></div>
+      ${draws?`<div style="font-size:12px;color:var(--muted);margin-top:4px;">${draws} draw${draws!==1?"s":""}</div>`:""}
+      <div style="display:flex;gap:14px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--muted);align-self:center;">Total pts</span>
+        <span style="font-size:14px;font-weight:900;color:var(--p1);">${domTotal}</span>
+        <span style="font-size:14px;font-weight:900;color:var(--p2);">${maxTotal}</span>
+        <span style="font-size:14px;font-weight:900;color:var(--p3);">${finTotal}</span>
+      </div>
+    </div>
+    <div class="sc full">
+      <div class="sc-title">BEST 5-RACE GP</div>
+      ${gpBestCard(dBestGP,"dom","var(--p1)",domAvgGP)}
+      ${gpBestCard(mBestGP,"max","var(--p2)",maxAvgGP)}
+      ${gpBestCard(fBestGP,"fin","var(--p3)",finAvgGP)}
+    </div>
+    <div class="sc"><div class="sc-title">DOM'S TOP VEHICLES</div>${vehTable3p("dom","dom")}</div>
+    <div class="sc"><div class="sc-title">MAX'S TOP VEHICLES</div>${vehTable3p("max","max")}</div>
+    <div class="sc full"><div class="sc-title">FIN'S TOP VEHICLES</div>${vehTable3p("fin","fin")}</div>
+    <div class="sc full">
+      <div class="sc-title">TRACK WINS (3P)</div>
+      <div style="overflow-x:auto;">
+        <table class="pt" style="min-width:0;width:100%;font-size:12px;">
+          <thead><tr>
+            <th style="text-align:left;padding:4px 5px;">Track</th>
+            <th style="color:var(--p1);text-align:center;padding:4px 3px;font-size:11px;">Dom</th>
+            <th style="color:var(--p2);text-align:center;padding:4px 3px;font-size:11px;">Max</th>
+            <th style="color:var(--p3);text-align:center;padding:4px 3px;font-size:11px;">Fin</th>
+            <th style="padding:4px 5px;">Lead</th>
+          </tr></thead>
+          <tbody>${trackRows3p}</tbody>
+        </table>
+      </div>
+    </div>
   </div>`;
 }
 
