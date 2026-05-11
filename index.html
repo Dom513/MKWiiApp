@@ -802,8 +802,8 @@ function makeRoundCard(round,isDraft){
       <div id="win-${px}${id}" style="margin-left:auto;">${wHTML}</div>
     </div>
     ${isDraft?`<div class="submit-row">
-      <button class="btn btn-submit" id="submit-btn" onclick="submitRound(false)" disabled>⬆ Submit Round to Database</button>
-      <div class="submit-hint" id="submit-hint">Fill every track and both positions to unlock submit.</div>
+      <button class="btn btn-submit" id="submit-btn-2p" onclick="submitRound(false)" disabled>⬆ Submit Round to Database</button>
+      <div class="submit-hint" id="submit-hint-2p">Fill every track and both positions to unlock submit.</div>
     </div>`:""}
   </div>`;
 }
@@ -917,7 +917,8 @@ function renderRounds(){
   allSub.sort((a,b)=>b.r.id-a.r.id);
   allSub.forEach(({r,is3})=>parts.push(is3?makeRoundCard3p(r,false):makeRoundCard(r,false)));
   c.innerHTML=parts.length?parts.join(""):'<div class="empty">Randomise some pairs above to start your first round 🏎️</div>';
-  if(draft||draft3p)checkSubmit();
+  if(draft)checkSubmit(false);
+  if(draft3p)checkSubmit(true);
   updateSidebar();
 }
 
